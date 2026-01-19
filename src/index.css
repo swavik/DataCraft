@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@layer base {
+  :root {
+    /* Warm peach/coral theme */
+    --background: 20 30% 96%;
+    --foreground: 20 10% 15%;
+
+    --card: 30 40% 98%;
+    --card-foreground: 20 10% 15%;
+
+    --popover: 30 40% 98%;
+    --popover-foreground: 20 10% 15%;
+
+    --primary: 12 76% 61%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 20 20% 92%;
+    --secondary-foreground: 20 10% 25%;
+
+    --muted: 25 25% 92%;
+    --muted-foreground: 20 10% 45%;
+
+    --accent: 350 65% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 70% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 20 10% 15%;
+
+    --border: 25 20% 88%;
+    --input: 25 20% 88%;
+    --ring: 12 76% 61%;
+
+    --radius: 0.75rem;
+
+    --sidebar-bg: 30 35% 97%;
+    --sidebar-border: 25 25% 90%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(12 76% 61%) 0%, hsl(350 65% 55%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(30 40% 98%) 0%, hsl(25 30% 96%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(20 30% 96%) 0%, hsl(25 25% 93%) 100%);
+    
+    --shadow-glow: 0 0 40px hsl(12 76% 61% / 0.2);
+    --shadow-card: 0 8px 32px hsl(20 10% 15% / 0.06);
+
+    --chart-real: 210 100% 56%;
+    --chart-synthetic: 12 76% 61%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  code, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card border border-border rounded-xl shadow-sm;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .stat-card {
+    @apply glass-card p-6 transition-all duration-300 hover:border-primary/30 hover:shadow-md;
+  }
+
+  .data-grid {
+    @apply bg-muted/50 rounded-lg font-mono text-sm;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 cursor-pointer;
+  }
+
+  .sidebar-item.active {
+    @apply bg-primary/10 text-primary font-medium;
+  }
+
+  .page-container {
+    @apply flex-1 p-6 lg:p-8 overflow-auto;
+  }
+
+  .grid-pattern {
+    background-image: 
+      linear-gradient(to right, hsl(25 25% 90% / 0.4) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(25 25% 90% / 0.4) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.3s ease-out forwards;
+  }
+
+  .animate-bounce-slow {
+    animation: bounceSlow 3s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { 
+      box-shadow: 0 0 20px -5px hsl(12 76% 61% / 0.2);
+    }
+    50% { 
+      box-shadow: 0 0 40px -5px hsl(12 76% 61% / 0.4);
+    }
+  }
+
+  @keyframes bounceSlow {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-15px) rotate(5deg);
+    }
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted));
+    border-radius: 3px;
+  }
+}
