@@ -1,4 +1,4 @@
-import { CheckCircle, AlertTriangle, TrendingUp, Activity, Target, Gauge } from "lucide-react";
+import { CheckCircle, AlertTriangle, TrendingUp } from "lucide-react";
 import { QualityReport } from "@/types/dataset";
 
 interface QualityMetricsProps {
@@ -8,17 +8,17 @@ interface QualityMetricsProps {
 const QualityMetrics = ({ report }: QualityMetricsProps) => {
   const getQualityColor = () => {
     switch (report.qualityLevel) {
-      case 'excellent': return 'text-success';
-      case 'good': return 'text-warning';
-      default: return 'text-destructive';
+      case 'excellent': return 'text-green-600';
+      case 'good': return 'text-yellow-600';
+      default: return 'text-red-600';
     }
   };
 
   const getQualityIcon = () => {
     switch (report.qualityLevel) {
-      case 'excellent': return <CheckCircle className="w-6 h-6 text-success" />;
-      case 'good': return <TrendingUp className="w-6 h-6 text-warning" />;
-      default: return <AlertTriangle className="w-6 h-6 text-destructive" />;
+      case 'excellent': return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case 'good': return <TrendingUp className="w-5 h-5 text-yellow-600" />;
+      default: return <AlertTriangle className="w-5 h-5 text-red-600" />;
     }
   };
 
@@ -33,52 +33,31 @@ const QualityMetrics = ({ report }: QualityMetricsProps) => {
   return (
     <div className="space-y-6">
       {/* Overall Quality Score */}
-      <div className={`glass-card p-6 border ${
-        report.qualityLevel === 'excellent' ? 'border-success/30' :
-        report.qualityLevel === 'good' ? 'border-warning/30' : 'border-destructive/30'
-      }`}>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-              report.qualityLevel === 'excellent' ? 'bg-success/20' :
-              report.qualityLevel === 'good' ? 'bg-warning/20' : 'bg-destructive/20'
-            }`}>
-              {getQualityIcon()}
-            </div>
-            <div>
-              <h3 className="text-xl font-bold">{getQualityLabel()}</h3>
-              <p className="text-sm text-muted-foreground">
-                Synthetic data maintains {report.qualityLevel === 'excellent' ? 'excellent' : 'acceptable'} ML utility
-              </p>
-            </div>
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-4 mb-4">
+          {getQualityIcon()}
+          <div>
+            <h3 className="text-xl font-semibold">{getQualityLabel()}</h3>
+            <p className="text-sm text-muted-foreground">
+              Synthetic data maintains {report.qualityLevel === 'excellent' ? 'excellent' : 'acceptable'} ML utility
+            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <div className="p-4 bg-muted/30 rounded-lg text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Target className="w-4 h-4 text-[hsl(210,100%,56%)]" />
-              <span className="text-xs text-muted-foreground">Real Model</span>
-            </div>
-            <p className="text-2xl font-bold font-mono">{(report.realAccuracy * 100).toFixed(1)}%</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <div className="text-2xl font-bold text-blue-600">{(report.realAccuracy * 100).toFixed(1)}%</div>
+            <div className="text-sm text-muted-foreground">Real Model Accuracy</div>
           </div>
-          
-          <div className="p-4 bg-muted/30 rounded-lg text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Activity className="w-4 h-4 text-primary" />
-              <span className="text-xs text-muted-foreground">Synthetic Model</span>
-            </div>
-            <p className="text-2xl font-bold font-mono">{(report.syntheticAccuracy * 100).toFixed(1)}%</p>
+
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <div className="text-2xl font-bold text-green-600">{(report.syntheticAccuracy * 100).toFixed(1)}%</div>
+            <div className="text-sm text-muted-foreground">Synthetic Model Accuracy</div>
           </div>
-          
-          <div className="p-4 bg-muted/30 rounded-lg text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Gauge className="w-4 h-4 text-warning" />
-              <span className="text-xs text-muted-foreground">Difference</span>
-            </div>
-            <p className={`text-2xl font-bold font-mono ${getQualityColor()}`}>
-              {(report.accuracyDiff * 100).toFixed(2)}%
-            </p>
+
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <div className={`text-2xl font-bold ${getQualityColor()}`}>{(report.accuracyDiff * 100).toFixed(2)}%</div>
+            <div className="text-sm text-muted-foreground">Accuracy Difference</div>
           </div>
         </div>
       </div>
@@ -89,7 +68,7 @@ const QualityMetrics = ({ report }: QualityMetricsProps) => {
           <h4 className="font-semibold">Statistical Comparison</h4>
           <p className="text-sm text-muted-foreground">Column-level metrics comparison</p>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
@@ -104,26 +83,13 @@ const QualityMetrics = ({ report }: QualityMetricsProps) => {
             </thead>
             <tbody>
               {report.comparisonMetrics.map((metric, idx) => (
-                <tr key={idx} className="border-t border-border/50 hover:bg-muted/20">
+                <tr key={idx} className="border-t border-border/50">
                   <td className="px-4 py-3 font-medium">{metric.column}</td>
-                  <td className="px-4 py-3 text-right font-mono text-[hsl(210,100%,56%)]">
-                    {metric.realMean.toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-primary">
-                    {metric.syntheticMean.toFixed(2)}
-                  </td>
-                  <td className={`px-4 py-3 text-right font-mono ${
-                    metric.meanDiff < 5 ? 'text-success' : 
-                    metric.meanDiff < 15 ? 'text-warning' : 'text-destructive'
-                  }`}>
-                    {metric.meanDiff.toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">
-                    {metric.realStd.toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">
-                    {metric.syntheticStd.toFixed(2)}
-                  </td>
+                  <td className="px-4 py-3 text-right font-mono">{metric.realMean.toFixed(2)}</td>
+                  <td className="px-4 py-3 text-right font-mono">{metric.syntheticMean.toFixed(2)}</td>
+                  <td className="px-4 py-3 text-right font-mono">{metric.meanDiff.toFixed(2)}</td>
+                  <td className="px-4 py-3 text-right font-mono">{metric.realStd.toFixed(2)}</td>
+                  <td className="px-4 py-3 text-right font-mono">{metric.syntheticStd.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>

@@ -13,17 +13,20 @@ import SyntheticDataPage from "./pages/SyntheticDataPage";
 import ResultsPage from "./pages/ResultsPage";
 import HistoryPage from "./pages/HistoryPage";
 import About from "./pages/About";
+import Profile from "./pages/Profile"; // 1. Imported the new Profile page
 import NotFound from "./pages/NotFound";
+import LandingPage from "./pages/LandingPage";
 import { useDatasetHistory } from "./hooks/useDatasetHistory";
 import { DatasetHistory } from "./types/dataset";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const navigate = useNavigate();
-  const { history, addToHistory, updateDataset, removeFromHistory, getDataset, clearHistory } = useDatasetHistory();
+  const { history, loading, addToHistory, updateDataset, removeFromHistory, getDataset, clearHistory } = useDatasetHistory();
   const [currentDatasetId, setCurrentDatasetId] = useState<string | undefined>();
-  const currentDataset = currentDatasetId ? getDataset(currentDatasetId) : undefined;
 
   const handleDatasetReady = useCallback((dataset: DatasetHistory) => {
     addToHistory(dataset);
@@ -53,7 +56,7 @@ const AppContent = () => {
   }, [currentDatasetId, updateDataset]);
 
   const handleGenerationComplete = useCallback(() => {
-    // Refresh the dataset from history after update
+    // Logic for post-generation refresh if needed
   }, []);
 
   // Get fresh dataset after updates
@@ -61,61 +64,140 @@ const AppContent = () => {
 
   return (
     <Routes>
-      {/* Auth page - default landing page */}
-      <Route path="/" element={<AuthPage />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/auth" element={<AuthPage />} />
       
-      {/* Main app routes with MainLayout */}
-      <Route path="/*" element={
-        <MainLayout
-          history={history}
-          onSelectDataset={handleSelectDatasetById}
-          onDeleteDataset={removeFromHistory}
-          currentDatasetId={currentDatasetId}
-        >
-          <Routes>
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/upload" element={<UploadPage onDatasetReady={handleDatasetReady} />} />
-            <Route 
-              path="/preview" 
-              element={
-                <PreviewPage 
-                  dataset={freshDataset || null} 
-                  onDatasetUpdate={handleDatasetUpdate}
-                  onGenerationComplete={handleGenerationComplete}
-                />
-              } 
-            />
-            <Route path="/synthetic" element={<SyntheticDataPage dataset={freshDataset || null} />} />
-            <Route path="/results" element={<ResultsPage dataset={freshDataset || null} />} />
-            <Route 
-              path="/history" 
-              element={
-                <HistoryPage 
-                  history={history}
-                  onSelectDataset={handleSelectDataset}
-                  onDeleteDataset={removeFromHistory}
-                  onClearHistory={clearHistory}
-                />
-              } 
-            />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </MainLayout>
+      {/* Protected routes */}
+      <Route path="/home" element={
+        <ProtectedRoute>
+          <MainLayout
+            history={history}
+            onSelectDataset={handleSelectDatasetById}
+            onDeleteDataset={removeFromHistory}
+            currentDatasetId={currentDatasetId}
+          >
+            <HomePage />
+          </MainLayout>
+        </ProtectedRoute>
       } />
+
+      <Route path="/upload" element={
+        <ProtectedRoute>
+          <MainLayout
+            history={history}
+            onSelectDataset={handleSelectDatasetById}
+            onDeleteDataset={removeFromHistory}
+            currentDatasetId={currentDatasetId}
+          >
+            <UploadPage onDatasetReady={handleDatasetReady} />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/preview" element={
+        <ProtectedRoute>
+          <MainLayout
+            history={history}
+            onSelectDataset={handleSelectDatasetById}
+            onDeleteDataset={removeFromHistory}
+            currentDatasetId={currentDatasetId}
+          >
+            <PreviewPage 
+              dataset={freshDataset || null} 
+              onDatasetUpdate={handleDatasetUpdate}
+              onGenerationComplete={handleGenerationComplete}
+            />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/synthetic" element={
+        <ProtectedRoute>
+          <MainLayout
+            history={history}
+            onSelectDataset={handleSelectDatasetById}
+            onDeleteDataset={removeFromHistory}
+            currentDatasetId={currentDatasetId}
+          >
+            <SyntheticDataPage dataset={freshDataset || null} />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/results" element={
+        <ProtectedRoute>
+          <MainLayout
+            history={history}
+            onSelectDataset={handleSelectDatasetById}
+            onDeleteDataset={removeFromHistory}
+            currentDatasetId={currentDatasetId}
+          >
+            <ResultsPage dataset={freshDataset || null} />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/history" element={
+        <ProtectedRoute>
+          <MainLayout
+            history={history}
+            onSelectDataset={handleSelectDatasetById}
+            onDeleteDataset={removeFromHistory}
+            currentDatasetId={currentDatasetId}
+          >
+            <HistoryPage 
+              history={history}
+              onSelectDataset={handleSelectDataset}
+              onDeleteDataset={removeFromHistory}
+              onClearHistory={clearHistory}
+            />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/about" element={
+        <ProtectedRoute>
+          <MainLayout
+            history={history}
+            onSelectDataset={handleSelectDatasetById}
+            onDeleteDataset={removeFromHistory}
+            currentDatasetId={currentDatasetId}
+          >
+            <About />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      {/* 2. Added the Profile Route here */}
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <MainLayout
+            history={history}
+            onSelectDataset={handleSelectDatasetById}
+            onDeleteDataset={removeFromHistory}
+            currentDatasetId={currentDatasetId}
+          >
+            <Profile />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

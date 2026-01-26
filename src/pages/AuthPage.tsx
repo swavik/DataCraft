@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, User, Lock, ArrowRight, Sparkles, Shield, Layers } from 'lucide-react';
+import { Database, User, Lock, ArrowRight, Sparkles, Shield, Layers, AlertCircle, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/contexts/AuthContext';
 import authBg from '@/assets/auth-background.jpg';
 
 const carouselItems = [
@@ -26,12 +28,18 @@ const carouselItems = [
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const { signIn, signUp, loading } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [currentCarousel, setCurrentCarousel] = useState(0);
   const [textVisible, setTextVisible] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Trigger text animations
@@ -45,14 +53,52 @@ const AuthPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, just navigate to home
-    navigate('/home');
-  };
+    setError('');
+    setSuccess('');
+    setIsSubmitting(true);
 
-  const handleGuestContinue = () => {
-    navigate('/home');
+    if (!isLogin && password !== confirmPassword) {
+      setError('Passwords do not match');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!isLogin && (!name.trim() || name.trim().length < 2)) {
+      setError('Please enter a valid full name (at least 2 characters)');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { error } = isLogin
+        ? await signIn(email, password)
+        : await signUp(email, password, name, phoneNumber);
+
+      if (error) {
+        // Handle specific Supabase auth errors
+        let errorMessage = error.message;
+        if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Please check your email and click the confirmation link before signing in.';
+        } else if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+        } else if (error.message.includes('User already registered')) {
+          errorMessage = 'An account with this email already exists. Try signing in instead.';
+        }
+        setError(errorMessage);
+      } else {
+        if (!isLogin) {
+          setSuccess('Account created successfully!');
+        } else {
+          navigate('/home');
+        }
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -161,7 +207,11 @@ const AuthPage = () => {
               {/* Toggle Buttons */}
               <div className="flex rounded-xl bg-muted/50 p-1">
                 <button
-                  onClick={() => setIsLogin(true)}
+                  onClick={() => {
+                    setIsLogin(true);
+                    setError('');
+                    setSuccess('');
+                  }}
                   className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
                     isLogin 
                       ? 'bg-primary text-primary-foreground shadow-md' 
@@ -171,7 +221,13 @@ const AuthPage = () => {
                   Login
                 </button>
                 <button
-                  onClick={() => setIsLogin(false)}
+                  onClick={() => {
+                    setIsLogin(false);
+                    setError('');
+                    setSuccess('');
+                    setName('');
+                    setPhoneNumber('');
+                  }}
                   className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
                     !isLogin 
                       ? 'bg-primary text-primary-foreground shadow-md' 
@@ -184,6 +240,18 @@ const AuthPage = () => {
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-5">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                {success && (
+                  <Alert className="border-green-500 bg-green-50 text-green-800">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{success}</AlertDescription>
+                  </Alert>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-foreground font-medium">
                     Email
@@ -200,6 +268,44 @@ const AuthPage = () => {
                     />
                   </div>
                 </div>
+
+                {!isLogin && (
+                  <>
+                    <div className="space-y-2 animate-fade-in">
+                      <Label htmlFor="name" className="text-foreground font-medium">
+                        Full Name
+                      </Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="name"
+                          type="text"
+                          placeholder="Enter your full name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="pl-10 bg-background/50 border-border/50 focus:border-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 animate-fade-in">
+                      <Label htmlFor="phoneNumber" className="text-foreground font-medium">
+                        Phone Number
+                      </Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="phoneNumber"
+                          type="tel"
+                          placeholder="Enter your phone number"
+                          value={phoneNumber}
+                          onChange={(e) => setPhoneNumber(e.target.value)}
+                          className="pl-10 bg-background/50 border-border/50 focus:border-primary"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-foreground font-medium">
@@ -239,23 +345,13 @@ const AuthPage = () => {
 
                 <Button 
                   type="submit" 
+                  disabled={isSubmitting || loading}
                   className="w-full bg-accent hover:bg-accent/90 text-accent-foreground py-6 text-base font-semibold group"
                 >
-                  {isLogin ? 'Login' : 'Sign Up'}
-                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                  {isSubmitting ? 'Please wait...' : (isLogin ? 'Login' : 'Sign Up')}
+                  {!isSubmitting && <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />}
                 </Button>
               </form>
-
-              {/* Guest Option */}
-              <div className="text-center">
-                <button
-                  onClick={handleGuestContinue}
-                  className="text-primary hover:text-primary/80 font-medium text-sm transition-colors inline-flex items-center gap-1"
-                >
-                  Continue as Guest
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
             </div>
           </div>
         </div>
