@@ -26,9 +26,8 @@ interface SyntheticDataPageProps {
 
 const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
   const navigate = useNavigate();
-  const [downloadedFormat, setDownloadedFormat] = useState<string | null>(null);
 
-  if (!dataset || !dataset.syntheticData) {
+  if (!dataset || !dataset.syntheticData || !dataset.realData) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
         <div className="text-center">
@@ -60,7 +59,6 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    setDownloadedFormat('csv');
   };
 
   const downloadJSON = (data: any[], filename: string) => {
@@ -72,7 +70,6 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    setDownloadedFormat('json');
   };
 
   const downloadTXT = (data: any[], filename: string) => {
@@ -89,11 +86,11 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    setDownloadedFormat('txt');
   };
 
-  const previewData = dataset.syntheticData.slice(0, 10);
-  const columns = Object.keys(previewData[0] || {});
+  const previewRealData = dataset.realData.slice(0, 10);
+  const previewSyntheticData = dataset.syntheticData.slice(0, 10);
+  const columns = Object.keys(previewRealData[0] || {});
 
   return (
     <div className="min-h-full p-8">
@@ -133,14 +130,9 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
             <Button 
               variant="glass" 
               size="lg" 
-              className="h-auto py-4 flex-col gap-2 relative"
+              className="h-auto py-4 flex-col gap-2"
               onClick={() => downloadCSV(dataset.syntheticData!, 'synthetic_data.csv')}
             >
-              {downloadedFormat === 'csv' && (
-                <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-success flex items-center justify-center">
-                  <Check className="w-3 h-3 text-white" />
-                </div>
-              )}
               <FileSpreadsheet className="w-6 h-6 text-primary" />
               <span className="font-semibold">CSV</span>
               <span className="text-xs text-muted-foreground">Comma Separated</span>
@@ -149,14 +141,9 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
             <Button 
               variant="glass" 
               size="lg" 
-              className="h-auto py-4 flex-col gap-2 relative"
+              className="h-auto py-4 flex-col gap-2"
               onClick={() => downloadJSON(dataset.syntheticData!, 'synthetic_data.json')}
             >
-              {downloadedFormat === 'json' && (
-                <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-success flex items-center justify-center">
-                  <Check className="w-3 h-3 text-white" />
-                </div>
-              )}
               <FileType className="w-6 h-6 text-primary" />
               <span className="font-semibold">JSON</span>
               <span className="text-xs text-muted-foreground">JavaScript Object</span>
@@ -165,14 +152,9 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
             <Button 
               variant="glass" 
               size="lg" 
-              className="h-auto py-4 flex-col gap-2 relative"
+              className="h-auto py-4 flex-col gap-2"
               onClick={() => downloadTXT(dataset.syntheticData!, 'synthetic_data.txt')}
             >
-              {downloadedFormat === 'txt' && (
-                <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-success flex items-center justify-center">
-                  <Check className="w-3 h-3 text-white" />
-                </div>
-              )}
               <FileText className="w-6 h-6 text-primary" />
               <span className="font-semibold">TXT</span>
               <span className="text-xs text-muted-foreground">Tab Separated</span>
@@ -195,7 +177,6 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
                   Download as Excel (.xls)
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {
-                  // For PDF, we'd need a library - showing CSV for now
                   downloadCSV(dataset.syntheticData!, 'synthetic_data.csv');
                   alert('For PDF export, please use the CSV and convert it using your preferred tool');
                 }}>
@@ -207,41 +188,83 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
         </div>
 
         {/* Data Preview */}
-        <div className="glass-card overflow-hidden animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="p-4 border-b border-border flex items-center gap-3">
-            <Eye className="w-5 h-5 text-primary" />
-            <div>
-              <h3 className="font-semibold">Synthetic Data Preview</h3>
-              <p className="text-sm text-muted-foreground">First 10 rows of generated data</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          {/* Raw Data Preview */}
+          <div className="glass-card overflow-hidden">
+            <div className="p-4 border-b border-border flex items-center gap-3">
+              <Eye className="w-5 h-5 text-primary" />
+              <div>
+                <h3 className="font-semibold">Original Data Preview</h3>
+                <p className="text-sm text-muted-foreground">First 10 rows of uploaded data</p>
+              </div>
             </div>
-          </div>
-          
-          <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-            <Table>
-              <TableHeader className="sticky top-0 bg-card">
-                <TableRow>
-                  <TableHead className="w-12">#</TableHead>
-                  {columns.map((col) => (
-                    <TableHead key={col} className="whitespace-nowrap">{col}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {previewData.map((row, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+            
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+              <Table>
+                <TableHeader className="sticky top-0 bg-card">
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
                     {columns.map((col) => (
-                      <TableCell key={col} className="font-mono text-sm">
-                        {typeof row[col] === 'number' 
-                          ? row[col].toFixed(2) 
-                          : String(row[col]).slice(0, 25)
-                        }
-                      </TableCell>
+                      <TableHead key={col} className="whitespace-nowrap">{col}</TableHead>
                     ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {previewRealData.map((row, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+                      {columns.map((col) => (
+                        <TableCell key={col} className="font-mono text-sm">
+                          {typeof row[col] === 'number' 
+                            ? row[col].toFixed(2) 
+                            : String(row[col]).slice(0, 25)
+                          }
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {/* Synthetic Data Preview */}
+          <div className="glass-card overflow-hidden">
+            <div className="p-4 border-b border-border flex items-center gap-3">
+              <Eye className="w-5 h-5 text-primary" />
+              <div>
+                <h3 className="font-semibold">Synthetic Data Preview</h3>
+                <p className="text-sm text-muted-foreground">First 10 rows of generated data</p>
+              </div>
+            </div>
+            
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+              <Table>
+                <TableHeader className="sticky top-0 bg-card">
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
+                    {columns.map((col) => (
+                      <TableHead key={col} className="whitespace-nowrap">{col}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {previewSyntheticData.map((row, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+                      {columns.map((col) => (
+                        <TableCell key={col} className="font-mono text-sm">
+                          {typeof row[col] === 'number' 
+                            ? row[col].toFixed(2) 
+                            : String(row[col]).slice(0, 25)
+                          }
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
       </div>

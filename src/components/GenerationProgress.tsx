@@ -38,15 +38,7 @@ const GenerationProgress = ({ progress }: GenerationProgressProps) => {
         <Progress value={progress.progress} className="h-2" />
       </div>
       
-      {progress.epoch !== undefined && progress.totalEpochs !== undefined && (
-        <div className="mb-6 p-4 bg-muted/30 rounded-lg">
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-muted-foreground">Training Epoch</span>
-            <span className="font-mono text-foreground">{progress.epoch} / {progress.totalEpochs}</span>
-          </div>
-          <Progress value={(progress.epoch / progress.totalEpochs) * 100} className="h-1.5" />
-        </div>
-      )}
+      
       
       <div className="space-y-3">
         {stages.map((stage, index) => {

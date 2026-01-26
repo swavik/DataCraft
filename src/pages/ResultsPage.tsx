@@ -149,7 +149,7 @@ ${report.comparisonMetrics.map(m =>
               </div>
               <p className="text-3xl font-bold font-mono">{(report.realAccuracy * 100).toFixed(1)}%</p>
             </div>
-            
+
             <div className="p-5 bg-muted/30 rounded-xl text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Activity className="w-5 h-5 text-primary" />
@@ -157,7 +157,7 @@ ${report.comparisonMetrics.map(m =>
               </div>
               <p className="text-3xl font-bold font-mono">{(report.syntheticAccuracy * 100).toFixed(1)}%</p>
             </div>
-            
+
             <div className="p-5 bg-muted/30 rounded-xl text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Gauge className="w-5 h-5 text-warning" />
@@ -209,7 +209,6 @@ ${report.comparisonMetrics.map(m =>
                       {metric.realStd.toFixed(2)}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-muted-foreground">
-                      {metric.syntheticStd.toFixed(2)}
                     </td>
                   </tr>
                 ))}

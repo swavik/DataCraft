@@ -1,54 +1,114 @@
 import { useState, useEffect } from 'react';
 import { DatasetHistory } from '@/types/dataset';
-
-const STORAGE_KEY = 'dataCraft_history';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useDatasetHistory = () => {
   const [history, setHistory] = useState<DatasetHistory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setHistory(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to parse history:', e);
-      }
+    if (user) {
+      fetchHistory();
+    } else {
+      setHistory([]);
+      setLoading(false);
     }
-  }, []);
+  }, [user]);
 
-  const saveHistory = (newHistory: DatasetHistory[]) => {
+  const fetchHistory = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('dataset_history')
+        .select('data')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Failed to fetch history:', error);
+        return;
+      }
+
+      const historyData = data?.map(item => item.data as DatasetHistory) || [];
+      setHistory(historyData);
+    } catch (e) {
+      console.error('Failed to fetch history:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveHistory = async (newHistory: DatasetHistory[]) => {
+    if (!user) return;
+
     setHistory(newHistory);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
+
+    try {
+      // First, delete all existing records for this user
+      await supabase
+        .from('dataset_history')
+        .delete()
+        .eq('user_id', user.id);
+
+      // Then insert the new history
+      if (newHistory.length > 0) {
+        const records = newHistory.map(item => ({
+          user_id: user.id,
+          data: item
+        }));
+
+        const { error } = await supabase
+          .from('dataset_history')
+          .insert(records);
+
+        if (error) {
+          console.error('Failed to save history:', error);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to save history:', e);
+    }
   };
 
-  const addToHistory = (dataset: DatasetHistory) => {
+  const addToHistory = async (dataset: DatasetHistory) => {
+    if (!user) return;
+
     const newHistory = [dataset, ...history.filter(h => h.id !== dataset.id)].slice(0, 20);
-    saveHistory(newHistory);
+    await saveHistory(newHistory);
   };
 
-  const updateDataset = (id: string, updates: Partial<DatasetHistory>) => {
+  const updateDataset = async (id: string, updates: Partial<DatasetHistory>) => {
+    if (!user) return;
+
     const newHistory = history.map(h => 
       h.id === id ? { ...h, ...updates } : h
     );
-    saveHistory(newHistory);
+    await saveHistory(newHistory);
   };
 
-  const removeFromHistory = (id: string) => {
+  const removeFromHistory = async (id: string) => {
+    if (!user) return;
+
     const newHistory = history.filter(h => h.id !== id);
-    saveHistory(newHistory);
+    await saveHistory(newHistory);
   };
 
   const getDataset = (id: string) => {
     return history.find(h => h.id === id);
   };
 
-  const clearHistory = () => {
-    saveHistory([]);
+  const clearHistory = async () => {
+    if (!user) return;
+
+    await saveHistory([]);
   };
 
   return {
     history,
+    loading,
     addToHistory,
     updateDataset,
     removeFromHistory,

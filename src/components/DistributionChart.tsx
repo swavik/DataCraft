@@ -32,8 +32,8 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
     return (
       <div className="glass-card p-6">
         <h4 className="font-semibold mb-4 flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-[hsl(var(--chart-1))]" />
-          <span className="w-3 h-3 rounded-full bg-[hsl(var(--chart-2))]" />
+          <span className="w-3 h-3 rounded-full bg-blue-500" />
+          <span className="w-3 h-3 rounded-full bg-orange-500" />
           {column}
           <span className="text-xs text-muted-foreground ml-2">(KDE)</span>
         </h4>
@@ -41,12 +41,12 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id={`colorReal-${column}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.4}/>
-                <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id={`colorSynthetic-${column}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.4}/>
-                <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#f97316" stopOpacity={0.4}/>
+                <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
@@ -76,14 +76,14 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
             <Area 
               type="monotone" 
               dataKey="Real" 
-              stroke="hsl(var(--chart-1))" 
+              stroke="#3b82f6" 
               fill={`url(#colorReal-${column})`}
               strokeWidth={2}
             />
             <Area 
               type="monotone" 
               dataKey="Synthetic" 
-              stroke="hsl(var(--chart-2))" 
+              stroke="#f97316" 
               fill={`url(#colorSynthetic-${column})`}
               strokeWidth={2}
               strokeDasharray="5 5"
@@ -98,8 +98,8 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
   return (
     <div className="glass-card p-6">
       <h4 className="font-semibold mb-4 flex items-center gap-2">
-        <span className="w-3 h-3 rounded-full bg-[hsl(var(--chart-1))]" />
-        <span className="w-3 h-3 rounded-full bg-[hsl(var(--chart-2))]" />
+        <span className="w-3 h-3 rounded-full bg-blue-500" />
+        <span className="w-3 h-3 rounded-full bg-orange-500" />
         {column}
         <span className="text-xs text-muted-foreground ml-2">(Categorical)</span>
       </h4>
@@ -132,12 +132,12 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
           <Legend />
           <Bar 
             dataKey="Real" 
-            fill="hsl(var(--chart-1))" 
+            fill="#3b82f6" 
             radius={[4, 4, 0, 0]}
           />
           <Bar 
             dataKey="Synthetic" 
-            fill="hsl(var(--chart-2))" 
+            fill="#f97316" 
             radius={[4, 4, 0, 0]}
           />
         </BarChart>

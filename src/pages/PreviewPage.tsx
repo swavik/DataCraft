@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileSpreadsheet, Settings, Zap, Info, ArrowLeft, Eye } from 'lucide-react';
+import { FileSpreadsheet, Settings, Zap, ArrowLeft, Eye, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -20,7 +20,10 @@ interface PreviewPageProps {
 const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: PreviewPageProps) => {
   const navigate = useNavigate();
   const [numSamples, setNumSamples] = useState(dataset?.rowCount || 100);
-  const [epochs, setEpochs] = useState(300);
+  
+  // FIXED VALUE: Removed setEpochs since we no longer want users to change this in the UI
+  const [epochs] = useState(300); 
+  
   const [selectedModel, setSelectedModel] = useState<ModelType>('GaussianCopula');
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState<GenerationProgress>({
@@ -54,7 +57,7 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
         dataset.realData!,
         dataset.stats,
         numSamples,
-        epochs,
+        epochs, // Passes the fixed 300 value
         setProgress
       );
       
@@ -161,7 +164,6 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
 
           {/* Generation Config */}
           <div className="animate-slide-up space-y-6" style={{ animationDelay: '0.1s' }}>
-            {/* Model Recommendation */}
             <ModelRecommendation
               stats={dataset.stats}
               columnNames={columns}
@@ -169,7 +171,6 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
               onModelChange={setSelectedModel}
             />
 
-            {/* Generation Settings */}
             <div className="glass-card p-6 sticky top-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -182,7 +183,7 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
               </div>
 
               <div className="space-y-6">
-                {/* Number of Samples */}
+                {/* Number of Samples Slider (Kept) */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -208,33 +209,8 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
                   />
                 </div>
 
-                {/* Training Epochs */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Training Epochs</span>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="w-4 h-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>More epochs = better quality</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <span className="text-sm font-mono text-primary">{epochs}</span>
-                  </div>
-                  <Slider
-                    value={[epochs]}
-                    onValueChange={([value]) => setEpochs(value)}
-                    min={100}
-                    max={500}
-                    step={50}
-                    className="w-full"
-                  />
-                </div>
+                {/* Training Epochs Slider (Removed as requested) */}
 
-                {/* Generate Button */}
                 <Button 
                   variant="glow" 
                   size="lg" 
