@@ -28,12 +28,14 @@ export const analyzeDataset = (data: any[]): DatasetStats => {
     // Determine if numerical or categorical
     const numericValues = nonNullValues.filter(v => typeof v === 'number' && !isNaN(v));
     const isNumerical = numericValues.length > nonNullValues.length * 0.5;
+    const isInteger = isNumerical && numericValues.every(v => Number.isInteger(v));
 
     const colInfo: DatasetColumn = {
       name: col,
       type: isNumerical ? 'numerical' : 'categorical',
       unique: new Set(nonNullValues).size,
-      missing
+      missing,
+      isInteger
     };
 
     if (isNumerical && numericValues.length > 0) {
@@ -127,12 +129,22 @@ export const generateSyntheticData = async (
           value = Math.max(colInfo.min * 0.8, Math.min(colInfo.max * 1.2, value));
         }
         
-        syntheticRow[col] = Math.round(value * 100) / 100;
+        if (colInfo.isInteger) {
+          syntheticRow[col] = Math.round(value);
+        } else {
+          syntheticRow[col] = Math.round(value * 100) / 100;
+        }
       } else {
         // For categorical: sample from existing values with some variation
-        const realValues = realData.map(r => r[col]).filter(v => v !== undefined && v !== null);
+        const realValues = realData.map(r => r[col]).filter(v => v !== undefined && v !== null && v !== '');
         const uniqueValues = [...new Set(realValues)];
-        syntheticRow[col] = uniqueValues[Math.floor(Math.random() * uniqueValues.length)];
+        
+        if (uniqueValues.length > 0) {
+          syntheticRow[col] = uniqueValues[Math.floor(Math.random() * uniqueValues.length)];
+        } else {
+          // Fallback if column is empty
+          syntheticRow[col] = "Sample Data";
+        }
       }
     });
     

@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
   :root {
@@ -53,8 +53,8 @@
     --shadow-glow: 0 0 40px hsl(12 76% 61% / 0.2);
     --shadow-card: 0 8px 32px hsl(20 10% 15% / 0.06);
 
-    --chart-real: 210 100% 56%;
-    --chart-synthetic: 12 76% 61%;
+    --chart-real: 217 91% 60%;
+    --chart-synthetic: 25 95% 53%;
   }
 }
 

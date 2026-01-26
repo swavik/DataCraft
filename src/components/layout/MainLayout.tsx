@@ -36,7 +36,7 @@ const MainLayout = ({
         <header className="h-14 border-b border-border bg-card/80 backdrop-blur-sm flex items-center px-6">
           <nav className="flex items-center gap-4">
             <Link 
-              to="/home" 
+              to="/" 
               className={cn(
                 "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
                 location.pathname === '/' 

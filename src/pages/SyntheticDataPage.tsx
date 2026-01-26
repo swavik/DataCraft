@@ -8,10 +8,13 @@ import {
   ArrowRight,
   Eye,
   FileType,
-  Check
+  Check,
+  Database,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -28,12 +31,12 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
   const navigate = useNavigate();
   const [downloadedFormat, setDownloadedFormat] = useState<string | null>(null);
 
-  if (!dataset || !dataset.syntheticData) {
+  if (!dataset || !dataset.syntheticData || !dataset.realData) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
         <div className="text-center">
           <FileSpreadsheet className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No synthetic data available</h2>
+          <h2 className="text-xl font-semibold mb-2">No data available</h2>
           <p className="text-muted-foreground mb-4">Generate synthetic data first</p>
           <Button asChild>
             <a href="/preview">Go to Preview</a>
@@ -92,8 +95,9 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
     setDownloadedFormat('txt');
   };
 
-  const previewData = dataset.syntheticData.slice(0, 10);
-  const columns = Object.keys(previewData[0] || {});
+  const previewSynthData = dataset.syntheticData.slice(0, 10);
+  const previewRealData = dataset.realData.slice(0, 10);
+  const columns = Object.keys(previewSynthData[0] || {});
 
   return (
     <div className="min-h-full p-8">
@@ -206,43 +210,161 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
           </div>
         </div>
 
-        {/* Data Preview */}
+        {/* Side-by-Side Data Preview */}
         <div className="glass-card overflow-hidden animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="p-4 border-b border-border flex items-center gap-3">
-            <Eye className="w-5 h-5 text-primary" />
-            <div>
-              <h3 className="font-semibold">Synthetic Data Preview</h3>
-              <p className="text-sm text-muted-foreground">First 10 rows of generated data</p>
+          <div className="p-4 border-b border-border flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Eye className="w-5 h-5 text-primary" />
+              <div>
+                <h3 className="font-semibold">Side-by-Side Data Preview</h3>
+                <p className="text-sm text-muted-foreground">Comparing first 10 rows of real and synthetic data</p>
+              </div>
             </div>
           </div>
           
-          <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-            <Table>
-              <TableHeader className="sticky top-0 bg-card">
-                <TableRow>
-                  <TableHead className="w-12">#</TableHead>
-                  {columns.map((col) => (
-                    <TableHead key={col} className="whitespace-nowrap">{col}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {previewData.map((row, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
-                    {columns.map((col) => (
-                      <TableCell key={col} className="font-mono text-sm">
-                        {typeof row[col] === 'number' 
-                          ? row[col].toFixed(2) 
-                          : String(row[col]).slice(0, 25)
-                        }
-                      </TableCell>
+          <Tabs defaultValue="side-by-side" className="w-full">
+            <div className="px-4 pt-4">
+              <TabsList className="grid w-full grid-cols-3 max-w-md">
+                <TabsTrigger value="side-by-side">Side-by-Side</TabsTrigger>
+                <TabsTrigger value="real">Real Data</TabsTrigger>
+                <TabsTrigger value="synthetic">Synthetic Data</TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="side-by-side" className="mt-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x border-t border-border">
+                {/* Real Data */}
+                <div className="overflow-hidden">
+                  <div className="p-3 bg-[hsl(var(--chart-real))]/5 flex items-center gap-2 border-b border-border">
+                    <Database className="w-4 h-4 text-[hsl(var(--chart-real))]" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-[hsl(var(--chart-real))]">Original Real Data</span>
+                  </div>
+                  <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                    <Table>
+                      <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
+                        <TableRow>
+                          <TableHead className="w-12 bg-[hsl(var(--chart-real))]/10">#</TableHead>
+                          {columns.map((col) => (
+                            <TableHead key={col} className="whitespace-nowrap bg-[hsl(var(--chart-real))]/10">{col}</TableHead>
+                          ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {previewRealData.map((row, idx) => (
+                          <TableRow key={idx}>
+                            <TableCell className="text-muted-foreground bg-[hsl(var(--chart-real))]/5">{idx + 1}</TableCell>
+                            {columns.map((col) => (
+                              <TableCell key={col} className="font-mono text-xs whitespace-nowrap">
+                                {typeof row[col] === 'number' 
+                                  ? row[col].toFixed(2) 
+                                  : String(row[col]).slice(0, 25)
+                                }
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+
+                {/* Synthetic Data */}
+                <div className="overflow-hidden">
+                  <div className="p-3 bg-[hsl(var(--chart-synthetic))]/5 flex items-center gap-2 border-b border-border">
+                    <Zap className="w-4 h-4 text-[hsl(var(--chart-synthetic))]" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-[hsl(var(--chart-synthetic))]">Generated Synthetic Data</span>
+                  </div>
+                  <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                    <Table>
+                      <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
+                        <TableRow>
+                          <TableHead className="w-12 bg-[hsl(var(--chart-synthetic))]/10">#</TableHead>
+                          {columns.map((col) => (
+                            <TableHead key={col} className="whitespace-nowrap bg-[hsl(var(--chart-synthetic))]/10">{col}</TableHead>
+                          ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {previewSynthData.map((row, idx) => (
+                          <TableRow key={idx}>
+                            <TableCell className="text-muted-foreground bg-[hsl(var(--chart-synthetic))]/5">{idx + 1}</TableCell>
+                            {columns.map((col) => (
+                              <TableCell key={col} className="font-mono text-xs whitespace-nowrap">
+                                {typeof row[col] === 'number' 
+                                  ? row[col].toFixed(2) 
+                                  : String(row[col]).slice(0, 25)
+                                }
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="real" className="mt-4 border-t border-border">
+              <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-card">
+                    <TableRow>
+                      <TableHead className="w-12">#</TableHead>
+                      {columns.map((col) => (
+                        <TableHead key={col} className="whitespace-nowrap">{col}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {previewRealData.map((row, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+                        {columns.map((col) => (
+                          <TableCell key={col} className="font-mono text-sm">
+                            {typeof row[col] === 'number' 
+                              ? row[col].toFixed(2) 
+                              : String(row[col]).slice(0, 25)
+                            }
+                          </TableCell>
+                        ))}
+                      </TableRow>
                     ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="synthetic" className="mt-4 border-t border-border">
+              <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-card">
+                    <TableRow>
+                      <TableHead className="w-12">#</TableHead>
+                      {columns.map((col) => (
+                        <TableHead key={col} className="whitespace-nowrap">{col}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {previewSynthData.map((row, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+                        {columns.map((col) => (
+                          <TableCell key={col} className="font-mono text-sm">
+                            {typeof row[col] === 'number' 
+                              ? row[col].toFixed(2) 
+                              : String(row[col]).slice(0, 25)
+                            }
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

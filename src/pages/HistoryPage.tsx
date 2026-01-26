@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { DatasetHistory } from '@/types/dataset';
 import { format } from 'date-fns';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface HistoryPageProps {
   history: DatasetHistory[];
@@ -37,6 +38,7 @@ interface HistoryPageProps {
 
 const HistoryPage = ({ history, onSelectDataset, onDeleteDataset, onClearHistory }: HistoryPageProps) => {
   const navigate = useNavigate();
+  const { addAction } = useUserProfile();
   
   const getQualityIcon = (level?: string) => {
     switch (level) {
@@ -54,7 +56,7 @@ const HistoryPage = ({ history, onSelectDataset, onDeleteDataset, onClearHistory
     }
   };
 
-  const downloadCSV = (data: any[], filename: string) => {
+  const downloadCSV = (data: any[], filename: string, datasetName: string, type: 'original' | 'synthetic') => {
     const headers = Object.keys(data[0]);
     const csv = [
       headers.join(','),
@@ -71,6 +73,19 @@ const HistoryPage = ({ history, onSelectDataset, onDeleteDataset, onClearHistory
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+    
+    addAction({
+      type: 'download',
+      description: `Downloaded ${type} data from "${datasetName}"`,
+    });
+  };
+
+  const handleDelete = (dataset: DatasetHistory) => {
+    onDeleteDataset(dataset.id);
+    addAction({
+      type: 'delete',
+      description: `Deleted dataset "${dataset.fileName}"`,
+    });
   };
 
   const handleViewDataset = (dataset: DatasetHistory) => {
@@ -215,7 +230,12 @@ const HistoryPage = ({ history, onSelectDataset, onDeleteDataset, onClearHistory
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      onClick={() => downloadCSV(dataset.realData!, `${dataset.fileName.replace('.csv', '')}_original.csv`)}
+                      onClick={() => downloadCSV(
+                        dataset.realData!, 
+                        `${dataset.fileName.replace('.csv', '')}_original.csv`,
+                        dataset.fileName,
+                        'original'
+                      )}
                       title="Download original"
                     >
                       <Download className="w-4 h-4" />
@@ -226,7 +246,12 @@ const HistoryPage = ({ history, onSelectDataset, onDeleteDataset, onClearHistory
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => downloadCSV(dataset.syntheticData!, `${dataset.fileName.replace('.csv', '')}_synthetic.csv`)}
+                      onClick={() => downloadCSV(
+                        dataset.syntheticData!, 
+                        `${dataset.fileName.replace('.csv', '')}_synthetic.csv`,
+                        dataset.fileName,
+                        'synthetic'
+                      )}
                       className="gap-1"
                     >
                       <Download className="w-4 h-4" />
@@ -254,7 +279,7 @@ const HistoryPage = ({ history, onSelectDataset, onDeleteDataset, onClearHistory
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction 
-                          onClick={() => onDeleteDataset(dataset.id)}
+                          onClick={() => handleDelete(dataset)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                           Delete

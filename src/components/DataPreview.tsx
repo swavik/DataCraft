@@ -6,9 +6,10 @@ import { DatasetStats, DatasetColumn } from "@/types/dataset";
 interface DataPreviewProps {
   data: any[];
   stats: DatasetStats;
+  compact?: boolean;
 }
 
-const DataPreview = ({ data, stats }: DataPreviewProps) => {
+const DataPreview = ({ data, stats, compact = false }: DataPreviewProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const rowsPerPage = 10;
   const totalPages = Math.ceil(data.length / rowsPerPage);
@@ -34,42 +35,77 @@ const DataPreview = ({ data, stats }: DataPreviewProps) => {
   };
 
   return (
-    <div className="glass-card overflow-hidden">
-      <div className="p-4 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Table className="w-5 h-5 text-primary" />
+    <div className={`overflow-hidden ${compact ? '' : 'glass-card'}`}>
+      {!compact && (
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Table className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold">Data Preview</h3>
+              <p className="text-sm text-muted-foreground">
+                {stats.rows.toLocaleString()} rows × {stats.columns} columns
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-semibold">Data Preview</h3>
-            <p className="text-sm text-muted-foreground">
-              {stats.rows.toLocaleString()} rows × {stats.columns} columns
-            </p>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <span className="text-sm text-muted-foreground px-2">
+              {currentPage + 1} / {totalPages}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={currentPage === totalPages - 1}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
-            disabled={currentPage === 0}
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <span className="text-sm text-muted-foreground px-2">
-            {currentPage + 1} / {totalPages}
+      )}
+      
+      {compact && (
+        <div className="p-3 border-b border-border/50 flex items-center justify-between">
+          <span className="text-xs font-medium text-muted-foreground">
+            {stats.rows.toLocaleString()} rows × {stats.columns} columns
           </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
-            disabled={currentPage === totalPages - 1}
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </Button>
+            <span className="text-xs text-muted-foreground px-1.5">
+              {currentPage + 1}/{totalPages}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={currentPage === totalPages - 1}
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
       
       <div className="overflow-x-auto scrollbar-thin">
         <table className="w-full text-sm">
@@ -110,27 +146,53 @@ const DataPreview = ({ data, stats }: DataPreviewProps) => {
         </table>
       </div>
       
-      <div className="p-4 border-t border-border bg-muted/20">
-        <div className="flex flex-wrap gap-4">
-          <div className="flex items-center gap-2 text-xs">
-            <Database className="w-4 h-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Missing values:</span>
-            <span className={stats.missingTotal > 0 ? 'text-warning font-medium' : 'text-success font-medium'}>
-              {stats.missingTotal}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-xs">
-            <Hash className="w-4 h-4 text-primary" />
-            <span className="text-muted-foreground">Numerical:</span>
-            <span className="font-medium">{stats.numericalColumns.length}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs">
-            <Type className="w-4 h-4 text-warning" />
-            <span className="text-muted-foreground">Categorical:</span>
-            <span className="font-medium">{stats.categoricalColumns.length}</span>
+      {!compact && (
+        <div className="p-4 border-t border-border bg-muted/20">
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-2 text-xs">
+              <Database className="w-4 h-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Missing values:</span>
+              <span className={stats.missingTotal > 0 ? 'text-warning font-medium' : 'text-success font-medium'}>
+                {stats.missingTotal}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <Hash className="w-4 h-4 text-primary" />
+              <span className="text-muted-foreground">Numerical:</span>
+              <span className="font-medium">{stats.numericalColumns.length}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <Type className="w-4 h-4 text-warning" />
+              <span className="text-muted-foreground">Categorical:</span>
+              <span className="font-medium">{stats.categoricalColumns.length}</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+      
+      {compact && (
+        <div className="p-2.5 border-t border-border/50 bg-muted/10">
+          <div className="flex flex-wrap gap-3 text-xs">
+            <div className="flex items-center gap-1.5">
+              <Hash className="w-3 h-3 text-primary" />
+              <span className="text-muted-foreground">Numerical:</span>
+              <span className="font-medium">{stats.numericalColumns.length}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Type className="w-3 h-3 text-warning" />
+              <span className="text-muted-foreground">Categorical:</span>
+              <span className="font-medium">{stats.categoricalColumns.length}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Database className="w-3 h-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Missing:</span>
+              <span className={stats.missingTotal > 0 ? 'text-warning font-medium' : 'text-success font-medium'}>
+                {stats.missingTotal}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,20 +1,30 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
+import FeaturesSection from "@/components/FeaturesSection";
+import ModelsSection from "@/components/ModelsSection";
+import HowItWorksSection from "@/components/HowItWorksSection";
+import CTASection from "@/components/CTASection";
 import FileUpload from "@/components/FileUpload";
 import DataPreview from "@/components/DataPreview";
 import GenerationConfig, { GenerationConfigType } from "@/components/GenerationConfig";
 import GenerationProgress from "@/components/GenerationProgress";
 import ResultsSection from "@/components/ResultsSection";
+import Footer from "@/components/Footer";
 import { 
   analyzeDataset, 
   generateSyntheticData, 
   calculateQualityReport 
 } from "@/utils/syntheticGenerator";
 import { DatasetStats, QualityReport, GenerationProgress as ProgressType } from "@/types/dataset";
+import { FolderOpen, Upload as UploadIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  const [stage, setStage] = useState<'hero' | 'upload' | 'preview' | 'generating' | 'results'>('hero');
+  const navigate = useNavigate();
+  const [stage, setStage] = useState<'landing' | 'upload' | 'preview' | 'generating' | 'results'>('landing');
+  const [activeTab, setActiveTab] = useState<'upload' | 'samples'>('upload');
   const [realData, setRealData] = useState<any[]>([]);
   const [syntheticData, setSyntheticData] = useState<any[]>([]);
   const [fileName, setFileName] = useState<string>('');
@@ -29,6 +39,11 @@ const Index = () => {
   const uploadSectionRef = useRef<HTMLDivElement>(null);
 
   const handleGetStarted = () => {
+    const isAuthenticated = localStorage.getItem('isLoggedIn') === 'true';
+    if (!isAuthenticated) {
+      navigate('/auth');
+      return;
+    }
     setStage('upload');
     setTimeout(() => {
       uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -87,30 +102,64 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background font-sans">
       <Header />
       
-      {/* Hero Section */}
-      {(stage === 'hero' || stage === 'upload') && (
-        <HeroSection onGetStarted={handleGetStarted} />
+      {/* Landing Page Sections - Only show on landing stage */}
+      {stage === 'landing' && (
+        <>
+          <HeroSection onGetStarted={handleGetStarted} />
+          <FeaturesSection />
+          <ModelsSection />
+          <HowItWorksSection />
+          <CTASection onGetStarted={handleGetStarted} />
+        </>
       )}
 
       {/* Upload Section */}
       {(stage === 'upload' || stage === 'preview') && (
-        <section ref={uploadSectionRef} className="py-12">
+        <section ref={uploadSectionRef} className="py-24 min-h-[80vh] flex flex-col justify-center">
           <div className="container mx-auto px-6">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-2xl font-bold mb-2 text-center">Upload Your Dataset</h2>
-              <p className="text-muted-foreground text-center mb-8">
-                Upload a CSV file to generate privacy-preserving synthetic data
-              </p>
+              <div className="text-center mb-12">
+                <p className="text-lg text-muted-foreground mb-8">
+                  Choose a CSV file or select from our sample datasets
+                </p>
+                
+                {/* Tabs */}
+                <div className="inline-flex p-1 bg-muted/50 border border-border/50 rounded-xl mb-12 w-full max-w-2xl">
+                  <Button
+                    variant="ghost"
+                    className={`flex-1 gap-2 h-12 rounded-lg transition-all ${activeTab === 'upload' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground'}`}
+                    onClick={() => setActiveTab('upload')}
+                  >
+                    <UploadIcon className="w-4 h-4" />
+                    Upload CSV
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className={`flex-1 gap-2 h-12 rounded-lg transition-all ${activeTab === 'samples' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground'}`}
+                    onClick={() => setActiveTab('samples')}
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                    Sample Datasets
+                  </Button>
+                </div>
+              </div>
               
-              <FileUpload
-                onFileUpload={handleFileUpload}
-                isUploaded={stage === 'preview'}
-                fileName={fileName}
-                onClear={handleClearFile}
-              />
+              {activeTab === 'upload' ? (
+                <FileUpload
+                  onFileUpload={handleFileUpload}
+                  isUploaded={stage === 'preview'}
+                  fileName={fileName}
+                  onClear={handleClearFile}
+                />
+              ) : (
+                <div className="glass-card p-12 text-center border-dashed border-2">
+                  <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-20" />
+                  <p className="text-muted-foreground">Sample datasets coming soon...</p>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -158,6 +207,7 @@ const Index = () => {
         />
       )}
 
+      <Footer />
     </div>
   );
 };

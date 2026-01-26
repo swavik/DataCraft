@@ -144,7 +144,7 @@ ${report.comparisonMetrics.map(m =>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-5 bg-muted/30 rounded-xl text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <Target className="w-5 h-5 text-[hsl(210,100%,56%)]" />
+                <Target className="w-5 h-5 text-[hsl(var(--chart-real))]" />
                 <span className="text-sm text-muted-foreground">Real Model Accuracy</span>
               </div>
               <p className="text-3xl font-bold font-mono">{(report.realAccuracy * 100).toFixed(1)}%</p>
@@ -152,7 +152,7 @@ ${report.comparisonMetrics.map(m =>
             
             <div className="p-5 bg-muted/30 rounded-xl text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <Activity className="w-5 h-5 text-primary" />
+                <Activity className="w-5 h-5 text-[hsl(var(--chart-synthetic))]" />
                 <span className="text-sm text-muted-foreground">Synthetic Model Accuracy</span>
               </div>
               <p className="text-3xl font-bold font-mono">{(report.syntheticAccuracy * 100).toFixed(1)}%</p>
@@ -193,10 +193,10 @@ ${report.comparisonMetrics.map(m =>
                 {report.comparisonMetrics.map((metric, idx) => (
                   <tr key={idx} className="border-t border-border/50 hover:bg-muted/20">
                     <td className="px-4 py-3 font-medium">{metric.column}</td>
-                    <td className="px-4 py-3 text-right font-mono text-[hsl(210,100%,56%)]">
+                    <td className="px-4 py-3 text-right font-mono text-[hsl(var(--chart-real))]">
                       {metric.realMean.toFixed(2)}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-primary">
+                    <td className="px-4 py-3 text-right font-mono text-[hsl(var(--chart-synthetic))]">
                       {metric.syntheticMean.toFixed(2)}
                     </td>
                     <td className={`px-4 py-3 text-right font-mono ${

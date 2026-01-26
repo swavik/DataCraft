@@ -7,6 +7,7 @@ export interface DatasetColumn {
   std?: number;
   min?: number;
   max?: number;
+  isInteger?: boolean;
 }
 
 export interface DatasetStats {

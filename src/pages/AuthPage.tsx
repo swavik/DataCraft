@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, User, Lock, ArrowRight, Sparkles, Shield, Layers } from 'lucide-react';
+import { Database, User, Lock, ArrowRight, Sparkles, Shield, Layers, Phone, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,10 +24,16 @@ const carouselItems = [
   }
 ];
 
-const AuthPage = () => {
+interface AuthPageProps {
+  onLogin: () => void;
+}
+
+const AuthPage = ({ onLogin }: AuthPageProps) => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [currentCarousel, setCurrentCarousel] = useState(0);
@@ -47,12 +53,60 @@ const AuthPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, just navigate to home
-    navigate('/home');
+    
+    const USERS_STORAGE_KEY = 'dataCraft_users';
+    const usersData = localStorage.getItem(USERS_STORAGE_KEY);
+    let users: Record<string, any> = {};
+    try {
+      users = usersData ? JSON.parse(usersData) : {};
+    } catch (e) {
+      users = {};
+    }
+
+    // Save user profile if signing up
+    if (!isLogin) {
+      const userProfile = {
+        name: name || 'User',
+        email: email,
+        phone: phone || 'Not provided',
+        joinedDate: new Date().toISOString(),
+      };
+      
+      // If user exists, we might want to preserve their history and other data
+      const existingUser = users[email] || {};
+      users[email] = {
+        ...existingUser,
+        profile: userProfile,
+        actions: existingUser.actions || [],
+        history: existingUser.history || []
+      };
+      
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    } else {
+      // For login, retrieve existing profile or create default
+      const existingUser = users[email];
+      if (!existingUser) {
+        const userProfile = {
+          name: 'User',
+          email: email,
+          phone: 'Not provided',
+          joinedDate: new Date().toISOString(),
+        };
+        users[email] = { profile: userProfile, actions: [], history: [] };
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+      }
+    }
+    
+    localStorage.setItem('dataCraft_currentUserEmail', email);
+    window.dispatchEvent(new CustomEvent('user-changed'));
+    onLogin();
   };
 
   const handleGuestContinue = () => {
-    navigate('/home');
+    const guestEmail = 'guest@example.com';
+    localStorage.setItem('dataCraft_currentUserEmail', guestEmail);
+    window.dispatchEvent(new CustomEvent('user-changed'));
+    onLogin();
   };
 
   return (
@@ -76,7 +130,7 @@ const AuthPage = () => {
         <div className="hidden lg:flex flex-1 flex-col justify-center px-12 xl:px-20">
           <div className={`space-y-6 transition-all duration-1000 ${textVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             {/* Logo */}
-            <div className="flex items-center gap-3 mb-8">
+            <div className="flex items-center gap-3 mb-8 cursor-pointer" onClick={() => navigate('/')}>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
                 <Database className="w-6 h-6 text-white" />
               </div>
@@ -184,6 +238,25 @@ const AuthPage = () => {
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-5">
+                {!isLogin && (
+                  <div className="space-y-2 animate-fade-in">
+                    <Label htmlFor="name" className="text-foreground font-medium">
+                      Full Name
+                    </Label>
+                    <div className="relative">
+                      <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder="Enter your full name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="pl-10 bg-background/50 border-border/50 focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-foreground font-medium">
                     Email
@@ -200,6 +273,25 @@ const AuthPage = () => {
                     />
                   </div>
                 </div>
+
+                {!isLogin && (
+                  <div className="space-y-2 animate-fade-in">
+                    <Label htmlFor="phone" className="text-foreground font-medium">
+                      Phone Number
+                    </Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="pl-10 bg-background/50 border-border/50 focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-foreground font-medium">

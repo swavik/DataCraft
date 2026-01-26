@@ -1,5 +1,6 @@
-import { CheckCircle, AlertTriangle, TrendingUp, Activity, Target, Gauge } from "lucide-react";
+import { CheckCircle, AlertTriangle, TrendingUp, Activity, Target, Gauge, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { QualityReport } from "@/types/dataset";
+import ScoreGauge from "./ScoreGauge";
 
 interface QualityMetricsProps {
   report: QualityReport;
@@ -14,14 +15,6 @@ const QualityMetrics = ({ report }: QualityMetricsProps) => {
     }
   };
 
-  const getQualityIcon = () => {
-    switch (report.qualityLevel) {
-      case 'excellent': return <CheckCircle className="w-6 h-6 text-success" />;
-      case 'good': return <TrendingUp className="w-6 h-6 text-warning" />;
-      default: return <AlertTriangle className="w-6 h-6 text-destructive" />;
-    }
-  };
-
   const getQualityLabel = () => {
     switch (report.qualityLevel) {
       case 'excellent': return 'Excellent Quality';
@@ -30,54 +23,73 @@ const QualityMetrics = ({ report }: QualityMetricsProps) => {
     }
   };
 
+  // Calculate an overall score from 0 to 100 based on accuracy difference
+  const overallScore = Math.max(0, Math.min(100, 100 - (report.accuracyDiff * 200)));
+
   return (
     <div className="space-y-6">
-      {/* Overall Quality Score */}
-      <div className={`glass-card p-6 border ${
-        report.qualityLevel === 'excellent' ? 'border-success/30' :
-        report.qualityLevel === 'good' ? 'border-warning/30' : 'border-destructive/30'
-      }`}>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-              report.qualityLevel === 'excellent' ? 'bg-success/20' :
-              report.qualityLevel === 'good' ? 'bg-warning/20' : 'bg-destructive/20'
-            }`}>
-              {getQualityIcon()}
-            </div>
-            <div>
-              <h3 className="text-xl font-bold">{getQualityLabel()}</h3>
-              <p className="text-sm text-muted-foreground">
-                Synthetic data maintains {report.qualityLevel === 'excellent' ? 'excellent' : 'acceptable'} ML utility
-              </p>
-            </div>
-          </div>
+      {/* Overall Quality Score Modular Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 glass-card p-6 flex flex-col items-center justify-center">
+          <ScoreGauge 
+            score={overallScore} 
+            label="Utility Score"
+            subLabel={getQualityLabel()}
+          />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <div className="p-4 bg-muted/30 rounded-lg text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Target className="w-4 h-4 text-[hsl(210,100%,56%)]" />
-              <span className="text-xs text-muted-foreground">Real Model</span>
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="glass-card p-5 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground font-medium">Real Data Utility</span>
+              <Target className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-2xl font-bold font-mono">{(report.realAccuracy * 100).toFixed(1)}%</p>
-          </div>
-          
-          <div className="p-4 bg-muted/30 rounded-lg text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Activity className="w-4 h-4 text-primary" />
-              <span className="text-xs text-muted-foreground">Synthetic Model</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold">{(report.realAccuracy * 100).toFixed(1)}%</span>
+              <span className="text-xs text-muted-foreground">Accuracy</span>
             </div>
-            <p className="text-2xl font-bold font-mono">{(report.syntheticAccuracy * 100).toFixed(1)}%</p>
+            <p className="text-xs text-muted-foreground mt-4">
+              Performance of model trained on real data
+            </p>
           </div>
-          
-          <div className="p-4 bg-muted/30 rounded-lg text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
+
+          <div className="glass-card p-5 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground font-medium">Synthetic Utility</span>
+              <Activity className="w-4 h-4 text-chart-2" />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold">{(report.syntheticAccuracy * 100).toFixed(1)}%</span>
+              <span className="text-xs text-muted-foreground">Accuracy</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              Performance of model trained on synthetic data
+            </p>
+          </div>
+
+          <div className="glass-card p-5 flex flex-col justify-between md:col-span-2">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground font-medium">Fidelity Gap</span>
               <Gauge className="w-4 h-4 text-warning" />
-              <span className="text-xs text-muted-foreground">Difference</span>
             </div>
-            <p className={`text-2xl font-bold font-mono ${getQualityColor()}`}>
-              {(report.accuracyDiff * 100).toFixed(2)}%
+            <div className="flex items-center gap-4">
+              <div className="flex items-baseline gap-2">
+                <span className={`text-2xl font-bold ${getQualityColor()}`}>
+                  {(report.accuracyDiff * 100).toFixed(2)}%
+                </span>
+              </div>
+              <div className="flex-1 bg-muted h-2 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full rounded-full ${
+                    report.accuracyDiff < 0.05 ? 'bg-success' : 
+                    report.accuracyDiff < 0.1 ? 'bg-warning' : 'bg-destructive'
+                  }`}
+                  style={{ width: `${Math.min(100, report.accuracyDiff * 500)}%` }}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-4 italic">
+              Lower gap indicates better preservation of statistical relationships and patterns.
             </p>
           </div>
         </div>

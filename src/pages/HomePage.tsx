@@ -1,50 +1,51 @@
-import { Link } from 'react-router-dom';
-import { Database, Sparkles, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useNavigate } from "react-router-dom";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useDatasetHistory } from "@/hooks/useDatasetHistory";
+import DatasetUsageStats from "@/components/dashboard/DatasetUsageStats";
+import UserActivityTimeline from "@/components/dashboard/UserActivityTimeline";
+import EvaluationChart from "@/components/dashboard/EvaluationChart";
+import { Button } from "@/components/ui/button";
+import { Upload, Sparkles } from "lucide-react";
 
-const HomePage = () => {
+export default function HomePage() {
+  const navigate = useNavigate();
+  const { profile, actions } = useUserProfile();
+  const { history } = useDatasetHistory();
+
   return (
-    <div className="min-h-full grid-pattern flex items-center justify-center p-8">
-      <div className="max-w-2xl mx-auto text-center animate-fade-in">
-        {/* Icon */}
-        <div className="w-20 h-20 mx-auto mb-8 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-          <Database className="w-10 h-10 text-white" />
+    <div className="page-container">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Welcome back, {profile.name.split(' ')[0]}!
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Here's an overview of your synthetic data generation activities
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={() => navigate('/upload')} className="gap-2">
+              <Upload className="w-4 h-4" />
+              Upload Dataset
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/history')} className="gap-2">
+              <Sparkles className="w-4 h-4" />
+              View History
+            </Button>
+          </div>
         </div>
 
-        {/* Title */}
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
-          Generate{' '}
-          <span className="gradient-text">Synthetic Data</span>
-        </h1>
+        {/* Stats Cards */}
+        <DatasetUsageStats history={history} />
 
-        {/* Description */}
-        <p className="text-lg text-muted-foreground mb-10 max-w-lg mx-auto">
-          Transform your datasets into privacy-safe synthetic data using advanced CTGAN technology
-        </p>
-
-        {/* CTA Button */}
-        <Button 
-          asChild
-          variant="glow" 
-          size="xl"
-          className="group"
-        >
-          <Link to="/upload">
-            <Sparkles className="w-5 h-5" />
-            Start Generating
-            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </Button>
-
-        {/* Learn More Link */}
-        <p className="mt-8 text-sm text-muted-foreground">
-          <Link to="/about" className="hover:text-primary transition-colors">
-            Learn more about how it works →
-          </Link>
-        </p>
+        {/* Charts and Activity */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <EvaluationChart history={history} />
+          <UserActivityTimeline actions={actions} />
+        </div>
       </div>
     </div>
   );
-};
-
-export default HomePage;
+}

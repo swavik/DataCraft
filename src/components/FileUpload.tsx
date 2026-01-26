@@ -135,11 +135,11 @@ const FileUpload = ({ onFileUpload, isUploaded, fileName, onClear }: FileUploadP
           )}
         </div>
         
-        <h3 className="text-lg font-semibold mb-2">
-          {isProcessing ? 'Processing...' : 'Upload Your Dataset'}
+        <h3 className="text-xl font-bold mb-2">
+          {isProcessing ? 'Processing...' : 'Drop your CSV file here'}
         </h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Drag and drop your CSV file here, or click to browse
+        <p className="text-muted-foreground mb-4">
+          or click to browse your files
         </p>
         
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
