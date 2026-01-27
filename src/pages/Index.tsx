@@ -15,8 +15,8 @@ import { DatasetStats, QualityReport, GenerationProgress as ProgressType } from 
 
 const Index = () => {
   const [stage, setStage] = useState<'hero' | 'upload' | 'preview' | 'generating' | 'results'>('hero');
-  const [realData, setRealData] = useState<any[]>([]);
-  const [syntheticData, setSyntheticData] = useState<any[]>([]);
+  const [realData, setRealData] = useState<Record<string, unknown>[]>([]);
+  const [syntheticData, setSyntheticData] = useState<Record<string, unknown>[]>([]);
   const [fileName, setFileName] = useState<string>('');
   const [stats, setStats] = useState<DatasetStats | null>(null);
   const [qualityReport, setQualityReport] = useState<QualityReport | null>(null);
@@ -35,7 +35,7 @@ const Index = () => {
     }, 100);
   };
 
-  const handleFileUpload = (file: File, data: any[]) => {
+  const handleFileUpload = (file: File, data: Record<string, unknown>[]) => {
     setFileName(file.name);
     setRealData(data);
     const dataStats = analyzeDataset(data);

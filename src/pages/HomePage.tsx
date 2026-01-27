@@ -38,7 +38,7 @@ const HomePage = () => {
 
         {/* Learn More Link */}
         <p className="mt-8 text-sm text-muted-foreground">
-          <Link to="/about" className="hover:text-primary transition-colors">
+          <Link to="/#how-it-works" className="hover:text-primary transition-colors">
             Learn more about how it works →
           </Link>
         </p>

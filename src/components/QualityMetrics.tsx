@@ -57,7 +57,7 @@ const QualityMetrics = ({ report }: QualityMetricsProps) => {
         <div className="grid grid-cols-3 gap-4">
           <div className="p-4 bg-muted/30 rounded-lg text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Target className="w-4 h-4 text-[hsl(210,100%,56%)]" />
+              <Target className="w-4 h-4 text-[#3b82f6]" />
               <span className="text-xs text-muted-foreground">Real Model</span>
             </div>
             <p className="text-2xl font-bold font-mono">{(report.realAccuracy * 100).toFixed(1)}%</p>
@@ -65,7 +65,7 @@ const QualityMetrics = ({ report }: QualityMetricsProps) => {
           
           <div className="p-4 bg-muted/30 rounded-lg text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Activity className="w-4 h-4 text-primary" />
+              <Activity className="w-4 h-4 text-[#10b981]" />
               <span className="text-xs text-muted-foreground">Synthetic Model</span>
             </div>
             <p className="text-2xl font-bold font-mono">{(report.syntheticAccuracy * 100).toFixed(1)}%</p>
@@ -106,10 +106,10 @@ const QualityMetrics = ({ report }: QualityMetricsProps) => {
               {report.comparisonMetrics.map((metric, idx) => (
                 <tr key={idx} className="border-t border-border/50 hover:bg-muted/20">
                   <td className="px-4 py-3 font-medium">{metric.column}</td>
-                  <td className="px-4 py-3 text-right font-mono text-[hsl(210,100%,56%)]">
+                  <td className="px-4 py-3 text-right font-mono text-[#3b82f6]">
                     {metric.realMean.toFixed(2)}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-primary">
+                  <td className="px-4 py-3 text-right font-mono text-[#10b981]">
                     {metric.syntheticMean.toFixed(2)}
                   </td>
                   <td className={`px-4 py-3 text-right font-mono ${

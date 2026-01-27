@@ -8,7 +8,8 @@ import {
   ArrowRight,
   Eye,
   FileType,
-  Check
+  Check,
+  File
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -19,6 +20,8 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { DatasetHistory } from '@/types/dataset';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface SyntheticDataPageProps {
   dataset: DatasetHistory | null;
@@ -43,13 +46,13 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
     );
   }
 
-  const downloadCSV = (data: any[], filename: string) => {
+  const downloadCSV = (data: Record<string, unknown>[], filename: string) => {
     const headers = Object.keys(data[0]);
     const csv = [
       headers.join(','),
       ...data.map(row => headers.map(h => {
         const val = row[h];
-        return typeof val === 'string' && val.includes(',') ? `"${val}"` : val;
+        return typeof val === 'string' && val.includes(',') ? `"${val}"` : String(val ?? '');
       }).join(','))
     ].join('\n');
     
@@ -63,7 +66,7 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
     setDownloadedFormat('csv');
   };
 
-  const downloadJSON = (data: any[], filename: string) => {
+  const downloadJSON = (data: Record<string, unknown>[], filename: string) => {
     const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -75,11 +78,11 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
     setDownloadedFormat('json');
   };
 
-  const downloadTXT = (data: any[], filename: string) => {
+  const downloadTXT = (data: Record<string, unknown>[], filename: string) => {
     const headers = Object.keys(data[0]);
     const txt = [
       headers.join('\t'),
-      ...data.map(row => headers.map(h => row[h]).join('\t'))
+      ...data.map(row => headers.map(h => String(row[h] ?? '')).join('\t'))
     ].join('\n');
     
     const blob = new Blob([txt], { type: 'text/plain' });
@@ -92,12 +95,54 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
     setDownloadedFormat('txt');
   };
 
-  const previewData = dataset.syntheticData.slice(0, 10);
-  const columns = Object.keys(previewData[0] || {});
+  const downloadPDF = (data: Record<string, unknown>[], filename: string) => {
+    const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    doc.setFontSize(20);
+    doc.setTextColor(63, 81, 181);
+    doc.text('DataCraft AI - Synthetic Data Export', 14, 15);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Dataset: ${dataset.fileName}`, 14, 22);
+    doc.text(`Exported: ${new Date().toLocaleString()}`, 14, 27);
+    doc.text(`Records: Showing first 100 of ${data.length.toLocaleString()}`, 14, 32);
+    
+    const headers = Object.keys(data[0]);
+    const body = data.slice(0, 100).map(row => headers.map(h => String(row[h] ?? '')));
+    
+    autoTable(doc, {
+      startY: 38,
+      head: [headers],
+      body: body,
+      theme: 'grid',
+      headStyles: { fillColor: [63, 81, 181], fontSize: 8 },
+      bodyStyles: { fontSize: 7 },
+      margin: { top: 38 },
+      didDrawPage: (data) => {
+        // Add footer on each page
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(
+          `Page ${doc.internal.getNumberOfPages()}`, 
+          pageWidth - 20, 
+          doc.internal.pageSize.getHeight() - 10
+        );
+      }
+    });
+    
+    doc.save(filename);
+    setDownloadedFormat('pdf');
+  };
+
+  const previewSynthetic = dataset.syntheticData.slice(0, 10);
+  const previewReal = dataset.realData ? dataset.realData.slice(0, 10) : [];
+  const columns = Object.keys(previewSynthetic[0] || previewReal[0] || {});
 
   return (
     <div className="min-h-full p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-[1600px] mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8 animate-fade-in">
           <div className="flex items-center gap-4">
@@ -194,11 +239,7 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
                 <DropdownMenuItem onClick={() => downloadCSV(dataset.syntheticData!, 'synthetic_data.xls')}>
                   Download as Excel (.xls)
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {
-                  // For PDF, we'd need a library - showing CSV for now
-                  downloadCSV(dataset.syntheticData!, 'synthetic_data.csv');
-                  alert('For PDF export, please use the CSV and convert it using your preferred tool');
-                }}>
+                <DropdownMenuItem onClick={() => downloadPDF(dataset.syntheticData!, 'synthetic_data.pdf')}>
                   Download as PDF
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -206,42 +247,90 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
           </div>
         </div>
 
-        {/* Data Preview */}
-        <div className="glass-card overflow-hidden animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="p-4 border-b border-border flex items-center gap-3">
-            <Eye className="w-5 h-5 text-primary" />
-            <div>
-              <h3 className="font-semibold">Synthetic Data Preview</h3>
-              <p className="text-sm text-muted-foreground">First 10 rows of generated data</p>
+        {/* Side-by-Side Preview */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          {/* Real Data Preview */}
+          <div className="glass-card overflow-hidden">
+            <div className="p-4 border-b border-border flex items-center gap-3 bg-muted/30">
+              <FileSpreadsheet className="w-5 h-5 text-muted-foreground" />
+              <div>
+                <h3 className="font-semibold">Real Data Preview</h3>
+                <p className="text-sm text-muted-foreground">Original dataset (Top 10 rows)</p>
+              </div>
             </div>
-          </div>
-          
-          <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-            <Table>
-              <TableHeader className="sticky top-0 bg-card">
-                <TableRow>
-                  <TableHead className="w-12">#</TableHead>
-                  {columns.map((col) => (
-                    <TableHead key={col} className="whitespace-nowrap">{col}</TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {previewData.map((row, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+            <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+              <Table>
+                <TableHeader className="sticky top-0 bg-card z-10">
+                  <TableRow>
+                    <TableHead className="w-12 bg-card">#</TableHead>
                     {columns.map((col) => (
-                      <TableCell key={col} className="font-mono text-sm">
-                        {typeof row[col] === 'number' 
-                          ? row[col].toFixed(2) 
-                          : String(row[col]).slice(0, 25)
-                        }
-                      </TableCell>
+                      <TableHead key={col} className="whitespace-nowrap bg-card">{col}</TableHead>
                     ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {previewReal.map((row, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+                      {columns.map((col) => {
+                        const colInfo = dataset.stats?.columnInfo.find(c => c.name === col);
+                        const precision = colInfo?.precision ?? 2;
+                        return (
+                          <TableCell key={col} className="font-mono text-xs">
+                            {typeof row[col] === 'number' 
+                              ? Number(row[col]).toFixed(precision) 
+                              : String(row[col] ?? '').slice(0, 20)
+                            }
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {/* Synthetic Data Preview */}
+          <div className="glass-card overflow-hidden border-primary/20 shadow-lg shadow-primary/5">
+            <div className="p-4 border-b border-border flex items-center gap-3 bg-primary/5">
+              <Eye className="w-5 h-5 text-primary" />
+              <div>
+                <h3 className="font-semibold">Synthetic Data Preview</h3>
+                <p className="text-sm text-muted-foreground">Generated dataset (Top 10 rows)</p>
+              </div>
+            </div>
+            <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+              <Table>
+                <TableHeader className="sticky top-0 bg-card z-10">
+                  <TableRow>
+                    <TableHead className="w-12 bg-card">#</TableHead>
+                    {columns.map((col) => (
+                      <TableHead key={col} className="whitespace-nowrap bg-card">{col}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {previewSynthetic.map((row, idx) => (
+                    <TableRow key={idx} className="bg-primary/[0.02]">
+                      <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+                      {columns.map((col) => {
+                        const colInfo = dataset.stats?.columnInfo.find(c => c.name === col);
+                        const precision = colInfo?.precision ?? 2;
+                        return (
+                          <TableCell key={col} className="font-mono text-xs text-primary/90">
+                            {typeof row[col] === 'number' 
+                              ? Number(row[col]).toFixed(precision) 
+                              : String(row[col] ?? '').slice(0, 20)
+                            }
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
       </div>

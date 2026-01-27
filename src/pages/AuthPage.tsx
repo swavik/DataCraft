@@ -4,6 +4,7 @@ import { Database, User, Lock, ArrowRight, Sparkles, Shield, Layers } from 'luci
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/context/AuthContext';
 import authBg from '@/assets/auth-background.jpg';
 
 const carouselItems = [
@@ -26,12 +27,20 @@ const carouselItems = [
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const { login, signup, user } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [currentCarousel, setCurrentCarousel] = useState(0);
   const [textVisible, setTextVisible] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      navigate('/home');
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     // Trigger text animations
@@ -47,11 +56,16 @@ const AuthPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, just navigate to home
+    if (isLogin) {
+      login(email);
+    } else {
+      signup(email, name || email.split('@')[0]);
+    }
     navigate('/home');
   };
 
   const handleGuestContinue = () => {
+    login('guest@datacraft.ai', 'Guest User');
     navigate('/home');
   };
 
@@ -184,6 +198,25 @@ const AuthPage = () => {
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-5">
+                {!isLogin && (
+                  <div className="space-y-2 animate-fade-in">
+                    <Label htmlFor="name" className="text-foreground font-medium">
+                      Full Name
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder="Enter your name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="pl-10 bg-background/50 border-border/50 focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-foreground font-medium">
                     Email

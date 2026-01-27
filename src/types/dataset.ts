@@ -7,6 +7,10 @@ export interface DatasetColumn {
   std?: number;
   min?: number;
   max?: number;
+  precision?: number;
+  isInteger?: boolean;
+  isId?: boolean;
+  frequencies?: Record<string, number>;
 }
 
 export interface DatasetStats {
@@ -32,6 +36,7 @@ export interface QualityReport {
   realAccuracy: number;
   syntheticAccuracy: number;
   accuracyDiff: number;
+  privacyScore: number;
   qualityLevel: 'excellent' | 'good' | 'needs_improvement';
   comparisonMetrics: ComparisonMetric[];
 }
@@ -44,6 +49,14 @@ export interface GenerationProgress {
   totalEpochs?: number;
 }
 
+export interface GenerationSettings {
+  numSamples: number;
+  epochs: number;
+  noiseLevel: number;
+  privacyBudget: number;
+  preserveCorrelations: boolean;
+}
+
 export interface DatasetHistory {
   id: string;
   fileName: string;
@@ -51,8 +64,8 @@ export interface DatasetHistory {
   rowCount: number;
   columnCount: number;
   hasSynthetic: boolean;
-  realData?: any[];
-  syntheticData?: any[];
+  realData?: Record<string, unknown>[];
+  syntheticData?: Record<string, unknown>[];
   stats?: DatasetStats;
   qualityReport?: QualityReport;
 }
@@ -64,5 +77,5 @@ export interface SampleDataset {
   description: string;
   rowCount: number;
   columns: string[];
-  data: any[];
+  data: Record<string, unknown>[];
 }

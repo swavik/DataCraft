@@ -54,13 +54,13 @@ const HistoryPage = ({ history, onSelectDataset, onDeleteDataset, onClearHistory
     }
   };
 
-  const downloadCSV = (data: any[], filename: string) => {
+  const downloadCSV = (data: Record<string, unknown>[], filename: string) => {
     const headers = Object.keys(data[0]);
     const csv = [
       headers.join(','),
       ...data.map(row => headers.map(h => {
         const val = row[h];
-        return typeof val === 'string' && val.includes(',') ? `"${val}"` : val;
+        return typeof val === 'string' && val.includes(',') ? `"${val}"` : String(val ?? '');
       }).join(','))
     ].join('\n');
     

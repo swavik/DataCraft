@@ -11,7 +11,7 @@ const About = () => {
       <section className="py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold mb-4 text-foreground">About SynthGen</h1>
+            <h1 className="text-3xl font-bold mb-4 text-foreground">About DataCraft</h1>
             <p className="text-muted-foreground mb-8">
               A privacy-preserving synthetic data generation platform powered by CTGAN technology.
             </p>
@@ -89,7 +89,7 @@ const About = () => {
                   Enterprise Ready
                 </h2>
                 <p className="text-muted-foreground">
-                  SynthGen is designed for enterprise use cases including data sharing, 
+                  DataCraft is designed for enterprise use cases including data sharing, 
                   machine learning model training, software testing, and regulatory compliance. 
                   Generate unlimited synthetic data while maintaining full privacy compliance.
                 </p>

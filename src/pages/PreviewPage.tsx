@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileSpreadsheet, Settings, Zap, Info, ArrowLeft, Eye } from 'lucide-react';
+import { FileSpreadsheet, Settings, Zap, Info, ArrowLeft, Eye, Shield, BarChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DatasetHistory, GenerationProgress } from '@/types/dataset';
+import { DatasetHistory, GenerationProgress, GenerationSettings } from '@/types/dataset';
 import { generateSyntheticData, calculateQualityReport } from '@/utils/syntheticGenerator';
 import { ModelType } from '@/utils/modelRecommendation';
 import GenerationProgressComponent from '@/components/GenerationProgress';
@@ -21,6 +23,9 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
   const navigate = useNavigate();
   const [numSamples, setNumSamples] = useState(dataset?.rowCount || 100);
   const [epochs, setEpochs] = useState(300);
+  const [noiseLevel, setNoiseLevel] = useState(5);
+  const [privacyBudget, setPrivacyBudget] = useState(1.0);
+  const [preserveCorrelations, setPreserveCorrelations] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelType>('GaussianCopula');
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState<GenerationProgress>({
@@ -49,12 +54,19 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
     
     setIsGenerating(true);
     
+    const settings: GenerationSettings = {
+      numSamples,
+      epochs,
+      noiseLevel,
+      privacyBudget,
+      preserveCorrelations
+    };
+    
     try {
       const synthetic = await generateSyntheticData(
         dataset.realData!,
         dataset.stats,
-        numSamples,
-        epochs,
+        settings,
         setProgress
       );
       
@@ -130,11 +142,18 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
                   <TableBody>
                     {previewData.map((row, idx) => (
                       <TableRow key={idx}>
-                        {columns.map((col) => (
-                          <TableCell key={col} className="font-mono text-sm">
-                            {String(row[col]).slice(0, 20)}
-                          </TableCell>
-                        ))}
+                        {columns.map((col) => {
+                          const colInfo = dataset.stats.columnInfo.find(c => c.name === col);
+                          const precision = colInfo?.precision ?? 2;
+                          return (
+                            <TableCell key={col} className="font-mono text-sm">
+                              {typeof row[col] === 'number' 
+                                ? Number(row[col]).toFixed(precision) 
+                                : String(row[col] ?? '').slice(0, 20)
+                              }
+                            </TableCell>
+                          );
+                        })}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -218,7 +237,7 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
                           <Info className="w-4 h-4 text-muted-foreground" />
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>More epochs = better quality</p>
+                          <p>More epochs = better quality but slower generation</p>
                         </TooltipContent>
                       </Tooltip>
                     </div>
@@ -228,9 +247,76 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
                     value={[epochs]}
                     onValueChange={([value]) => setEpochs(value)}
                     min={100}
-                    max={500}
-                    step={50}
+                    max={1000}
+                    step={100}
                     className="w-full"
+                  />
+                </div>
+
+                {/* Privacy Budget */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">Privacy Budget (ε)</span>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Shield className="w-4 h-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Lower epsilon = stronger privacy, more noise</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <span className="text-sm font-mono text-primary">{privacyBudget.toFixed(1)}</span>
+                  </div>
+                  <Slider
+                    value={[privacyBudget * 10]}
+                    onValueChange={([value]) => setPrivacyBudget(value / 10)}
+                    min={1}
+                    max={100}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Noise Level */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">Noise Level</span>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <BarChart className="w-4 h-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Controls the variance of generated values</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <span className="text-sm font-mono text-primary">{noiseLevel}%</span>
+                  </div>
+                  <Slider
+                    value={[noiseLevel]}
+                    onValueChange={([value]) => setNoiseLevel(value)}
+                    min={0}
+                    max={20}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Preserve Correlations */}
+                <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <BarChart className="w-4 h-4 text-primary" />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">Preserve Correlations</span>
+                      <span className="text-[10px] text-muted-foreground">Maintain inter-column relationships</span>
+                    </div>
+                  </div>
+                  <Switch 
+                    checked={preserveCorrelations} 
+                    onCheckedChange={setPreserveCorrelations}
                   />
                 </div>
 

@@ -8,12 +8,15 @@ import {
   Target, 
   Activity, 
   Gauge,
-  BarChart3
+  BarChart3,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DistributionChart from '@/components/DistributionChart';
 import { DatasetHistory } from '@/types/dataset';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface ResultsPageProps {
   dataset: DatasetHistory | null;
@@ -61,6 +64,77 @@ const ResultsPage = ({ dataset }: ResultsPageProps) => {
       case 'good': return 'Good Quality';
       default: return 'Needs Improvement';
     }
+  };
+
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(63, 81, 181); // Primary color
+    doc.text('DataCraft AI - Quality Report', 14, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Dataset: ${dataset.fileName}`, 14, 30);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 35);
+    
+    doc.setDrawColor(200, 200, 200);
+    doc.line(14, 40, pageWidth - 14, 40);
+    
+    // ML Utility Section
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text('ML Utility Analysis', 14, 55);
+    
+    autoTable(doc, {
+      startY: 60,
+      head: [['Metric', 'Value']],
+      body: [
+        ['Real Model Accuracy', `${(report.realAccuracy * 100).toFixed(2)}%`],
+        ['Synthetic Model Accuracy', `${(report.syntheticAccuracy * 100).toFixed(2)}%`],
+        ['Accuracy Difference', `${(report.accuracyDiff * 100).toFixed(2)}%`],
+        ['Privacy Score', `${(report.privacyScore * 100).toFixed(2)}%`],
+        ['Quality Level', report.qualityLevel.toUpperCase()]
+      ],
+      theme: 'striped',
+      headStyles: { fillColor: [63, 81, 181] }
+    });
+    
+    // Statistical Comparison Section
+    doc.setFontSize(16);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const finalY = (doc as any).lastAutoTable.finalY || 60;
+    doc.text('Statistical Comparison', 14, finalY + 20);
+    
+    autoTable(doc, {
+      startY: finalY + 25,
+      head: [['Column', 'Real Mean', 'Synth Mean', 'Mean Diff', 'Real Std', 'Synth Std']],
+      body: report.comparisonMetrics.map(m => [
+        m.column,
+        m.realMean.toFixed(4),
+        m.syntheticMean.toFixed(4),
+        m.meanDiff.toFixed(4),
+        m.realStd.toFixed(4),
+        m.syntheticStd.toFixed(4)
+      ]),
+      theme: 'grid',
+      headStyles: { fillColor: [63, 81, 181] }
+    });
+    
+    // Footer
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Page ${i} of ${pageCount}`, pageWidth - 30, doc.internal.pageSize.getHeight() - 10);
+      doc.text('DataCraft AI - Confidential', 14, doc.internal.pageSize.getHeight() - 10);
+    }
+    
+    doc.save(`${dataset.fileName.split('.')[0]}_quality_report.pdf`);
   };
 
   const downloadReport = () => {
@@ -113,10 +187,16 @@ ${report.comparisonMetrics.map(m =>
               </p>
             </div>
           </div>
-          <Button onClick={downloadReport} variant="outline" className="gap-2">
-            <Download className="w-4 h-4" />
-            Download Report
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={downloadPDF} className="gap-2 shadow-lg shadow-primary/20">
+              <FileText className="w-4 h-4" />
+              Download PDF
+            </Button>
+            <Button onClick={downloadReport} variant="outline" className="gap-2">
+              <Download className="w-4 h-4" />
+              Download TXT
+            </Button>
+          </div>
         </div>
 
         {/* Quality Score Card */}

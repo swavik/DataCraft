@@ -5,8 +5,8 @@ import QualityMetrics from "./QualityMetrics";
 import { QualityReport } from "@/types/dataset";
 
 interface ResultsSectionProps {
-  realData: any[];
-  syntheticData: any[];
+  realData: Record<string, unknown>[];
+  syntheticData: Record<string, unknown>[];
   qualityReport: QualityReport;
   numericalColumns: string[];
   onReset: () => void;
@@ -20,13 +20,13 @@ const ResultsSection = ({
   onReset 
 }: ResultsSectionProps) => {
   
-  const downloadCSV = (data: any[], filename: string) => {
+  const downloadCSV = (data: Record<string, unknown>[], filename: string) => {
     if (data.length === 0) return;
     
     const headers = Object.keys(data[0]);
     const csv = [
       headers.join(','),
-      ...data.map(row => headers.map(h => row[h]).join(','))
+      ...data.map(row => headers.map(h => String(row[h] ?? '')).join(','))
     ].join('\n');
     
     const blob = new Blob([csv], { type: 'text/csv' });

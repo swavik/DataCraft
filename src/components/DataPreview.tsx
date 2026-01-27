@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { DatasetStats, DatasetColumn } from "@/types/dataset";
 
 interface DataPreviewProps {
-  data: any[];
+  data: Record<string, unknown>[];
   stats: DatasetStats;
 }
 

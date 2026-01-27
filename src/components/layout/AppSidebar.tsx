@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Database, 
   Upload, 
+  Sparkles,
   History, 
   ChevronLeft, 
   ChevronRight,
@@ -48,16 +49,27 @@ const AppSidebar = ({
         </Link>
       </div>
 
-      {/* New Dataset Button */}
-      <div className="p-3">
+      {/* Action Buttons */}
+      <div className="p-3 space-y-2">
         <Button 
           asChild
           variant="glow" 
-          className={cn("w-full", isCollapsed && "px-0")}
+          className={cn("w-full justify-start", isCollapsed && "px-0 justify-center")}
         >
           <Link to="/upload">
-            <Upload className="w-4 h-4" />
-            {!isCollapsed && <span>New Dataset</span>}
+            <Upload className="w-4 h-4 mr-2" />
+            {!isCollapsed && <span>Upload Dataset</span>}
+          </Link>
+        </Button>
+
+        <Button 
+          asChild
+          variant="outline" 
+          className={cn("w-full justify-start border-primary/20 hover:border-primary/50 hover:bg-primary/5 text-primary", isCollapsed && "px-0 justify-center")}
+        >
+          <Link to="/genai">
+            <Sparkles className="w-4 h-4 mr-2" />
+            {!isCollapsed && <span>GenAI Creator</span>}
           </Link>
         </Button>
       </div>

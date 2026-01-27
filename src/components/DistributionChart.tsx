@@ -13,8 +13,8 @@ import {
 } from 'recharts';
 
 interface DistributionChartProps {
-  realData: any[];
-  syntheticData: any[];
+  realData: Record<string, unknown>[];
+  syntheticData: Record<string, unknown>[];
   column: string;
   type: 'numerical' | 'categorical';
 }
@@ -32,8 +32,8 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
     return (
       <div className="glass-card p-6">
         <h4 className="font-semibold mb-4 flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-[hsl(var(--chart-1))]" />
-          <span className="w-3 h-3 rounded-full bg-[hsl(var(--chart-2))]" />
+          <span className="w-3 h-3 rounded-full bg-[#3b82f6]" />
+          <span className="w-3 h-3 rounded-full bg-[#10b981]" />
           {column}
           <span className="text-xs text-muted-foreground ml-2">(KDE)</span>
         </h4>
@@ -41,12 +41,12 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id={`colorReal-${column}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.4}/>
-                <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id={`colorSynthetic-${column}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.4}/>
-                <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
@@ -76,16 +76,16 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
             <Area 
               type="monotone" 
               dataKey="Real" 
-              stroke="hsl(var(--chart-1))" 
+              stroke="#3b82f6" 
               fill={`url(#colorReal-${column})`}
-              strokeWidth={2}
+              strokeWidth={3}
             />
             <Area 
               type="monotone" 
               dataKey="Synthetic" 
-              stroke="hsl(var(--chart-2))" 
+              stroke="#10b981" 
               fill={`url(#colorSynthetic-${column})`}
-              strokeWidth={2}
+              strokeWidth={3}
               strokeDasharray="5 5"
             />
           </AreaChart>
@@ -98,8 +98,8 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
   return (
     <div className="glass-card p-6">
       <h4 className="font-semibold mb-4 flex items-center gap-2">
-        <span className="w-3 h-3 rounded-full bg-[hsl(var(--chart-1))]" />
-        <span className="w-3 h-3 rounded-full bg-[hsl(var(--chart-2))]" />
+        <span className="w-3 h-3 rounded-full bg-[#3b82f6]" />
+        <span className="w-3 h-3 rounded-full bg-[#10b981]" />
         {column}
         <span className="text-xs text-muted-foreground ml-2">(Categorical)</span>
       </h4>
@@ -132,12 +132,12 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
           <Legend />
           <Bar 
             dataKey="Real" 
-            fill="hsl(var(--chart-1))" 
+            fill="#3b82f6" 
             radius={[4, 4, 0, 0]}
           />
           <Bar 
             dataKey="Synthetic" 
-            fill="hsl(var(--chart-2))" 
+            fill="#10b981" 
             radius={[4, 4, 0, 0]}
           />
         </BarChart>
@@ -147,9 +147,9 @@ const DistributionChart = ({ realData, syntheticData, column, type }: Distributi
 };
 
 // Create KDE-like smooth distribution data
-function createKDEData(realData: any[], syntheticData: any[], column: string) {
-  const realValues = realData.map(d => d[column]).filter(v => v !== undefined && v !== null && !isNaN(v));
-  const synthValues = syntheticData.map(d => d[column]).filter(v => v !== undefined && v !== null && !isNaN(v));
+function createKDEData(realData: Record<string, unknown>[], syntheticData: Record<string, unknown>[], column: string) {
+  const realValues = realData.map(d => d[column] as number).filter(v => v !== undefined && v !== null && !isNaN(v));
+  const synthValues = syntheticData.map(d => d[column] as number).filter(v => v !== undefined && v !== null && !isNaN(v));
   
   if (realValues.length === 0) return [];
   
@@ -198,7 +198,7 @@ function std(values: number[]): number {
 }
 
 // Create categorical comparison data
-function createCategoricalData(realData: any[], syntheticData: any[], column: string) {
+function createCategoricalData(realData: Record<string, unknown>[], syntheticData: Record<string, unknown>[], column: string) {
   const realValues = realData.map(d => d[column]).filter(v => v !== undefined && v !== null);
   const synthValues = syntheticData.map(d => d[column]).filter(v => v !== undefined && v !== null);
   

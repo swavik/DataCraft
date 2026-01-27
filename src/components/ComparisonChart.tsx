@@ -1,15 +1,15 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from "recharts";
 
 interface ComparisonChartProps {
-  realData: any[];
-  syntheticData: any[];
+  realData: Record<string, unknown>[];
+  syntheticData: Record<string, unknown>[];
   column: string;
 }
 
 const ComparisonChart = ({ realData, syntheticData, column }: ComparisonChartProps) => {
   // Create histogram data
-  const createHistogramData = (data: any[], col: string, bins: number = 20) => {
-    const values = data.map(d => d[col]).filter(v => v !== undefined && v !== null && !isNaN(v));
+  const createHistogramData = (data: Record<string, unknown>[], col: string, bins: number = 20) => {
+    const values = data.map(d => d[col] as number).filter(v => v !== undefined && v !== null && !isNaN(v));
     
     if (values.length === 0) return [];
     
@@ -47,56 +47,57 @@ const ComparisonChart = ({ realData, syntheticData, column }: ComparisonChartPro
   return (
     <div className="glass-card p-6">
       <h4 className="font-semibold mb-4 flex items-center gap-2">
-        <span className="w-3 h-3 rounded-full bg-[hsl(210,100%,56%)]" />
-        <span className="w-3 h-3 rounded-full bg-[hsl(168,76%,52%)]" />
+        <span className="w-3 h-3 rounded-full bg-[#3b82f6]" />
+        <span className="w-3 h-3 rounded-full bg-[#10b981]" />
         {column} Distribution
       </h4>
       <ResponsiveContainer width="100%" height={250}>
         <AreaChart data={mergedData}>
           <defs>
             <linearGradient id="colorReal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(210, 100%, 56%)" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="hsl(210, 100%, 56%)" stopOpacity={0}/>
+              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
             </linearGradient>
             <linearGradient id="colorSynthetic" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(168, 76%, 52%)" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="hsl(168, 76%, 52%)" stopOpacity={0}/>
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
+              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(217, 33%, 17%)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
           <XAxis 
             dataKey="bin" 
-            stroke="hsl(215, 20%, 55%)"
+            stroke="hsl(var(--muted-foreground))"
             fontSize={10}
             tickLine={false}
           />
           <YAxis 
-            stroke="hsl(215, 20%, 55%)"
+            stroke="hsl(var(--muted-foreground))"
             fontSize={10}
             tickLine={false}
           />
           <Tooltip 
             contentStyle={{
-              backgroundColor: 'hsl(222, 47%, 10%)',
-              border: '1px solid hsl(217, 33%, 17%)',
+              backgroundColor: 'hsl(var(--card))',
+              border: '1px solid hsl(var(--border))',
               borderRadius: '8px',
-              color: 'hsl(210, 40%, 98%)',
+              color: 'hsl(var(--foreground))',
             }}
           />
           <Legend />
           <Area 
             type="monotone" 
             dataKey="Real" 
-            stroke="hsl(210, 100%, 56%)" 
+            stroke="#3b82f6" 
             fill="url(#colorReal)"
-            strokeWidth={2}
+            strokeWidth={3}
           />
           <Area 
             type="monotone" 
             dataKey="Synthetic" 
-            stroke="hsl(168, 76%, 52%)" 
+            stroke="#10b981" 
             fill="url(#colorSynthetic)"
-            strokeWidth={2}
+            strokeWidth={3}
+            strokeDasharray="5 5"
           />
         </AreaChart>
       </ResponsiveContainer>

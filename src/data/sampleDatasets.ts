@@ -1,7 +1,7 @@
 import { SampleDataset } from '@/types/dataset';
 
 // Generate sample data helper
-const generateFinanceData = (): any[] => {
+const generateFinanceData = (): Record<string, unknown>[] => {
   const data = [];
   for (let i = 0; i < 100; i++) {
     data.push({
@@ -17,7 +17,7 @@ const generateFinanceData = (): any[] => {
   return data;
 };
 
-const generateHealthcareData = (): any[] => {
+const generateHealthcareData = (): Record<string, unknown>[] => {
   const data = [];
   for (let i = 0; i < 100; i++) {
     data.push({
@@ -33,7 +33,7 @@ const generateHealthcareData = (): any[] => {
   return data;
 };
 
-const generateRetailData = (): any[] => {
+const generateRetailData = (): Record<string, unknown>[] => {
   const data = [];
   for (let i = 0; i < 100; i++) {
     data.push({
@@ -49,7 +49,7 @@ const generateRetailData = (): any[] => {
   return data;
 };
 
-const generateHRData = (): any[] => {
+const generateHRData = (): Record<string, unknown>[] => {
   const data = [];
   for (let i = 0; i < 100; i++) {
     data.push({
@@ -65,7 +65,7 @@ const generateHRData = (): any[] => {
   return data;
 };
 
-const generateInsuranceData = (): any[] => {
+const generateInsuranceData = (): Record<string, unknown>[] => {
   const data = [];
   for (let i = 0; i < 100; i++) {
     data.push({
@@ -81,7 +81,7 @@ const generateInsuranceData = (): any[] => {
   return data;
 };
 
-const generateMarketingData = (): any[] => {
+const generateMarketingData = (): Record<string, unknown>[] => {
   const data = [];
   for (let i = 0; i < 100; i++) {
     data.push({
