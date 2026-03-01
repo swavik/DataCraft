@@ -99,7 +99,9 @@ const DataPreview = ({ data, stats }: DataPreviewProps) => {
               <tr key={idx} className="border-t border-border/50 hover:bg-muted/20 transition-colors">
                 {columns.map(col => (
                   <td key={col} className="px-4 py-3 font-mono text-xs whitespace-nowrap">
-                    {row[col] !== undefined && row[col] !== null ? String(row[col]) : (
+                    {row[col] !== undefined && row[col] !== null ? (
+                      typeof row[col] === 'number' ? Math.round(row[col]) : String(row[col])
+                    ) : (
                       <span className="text-muted-foreground italic">null</span>
                     )}
                   </td>

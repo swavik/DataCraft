@@ -96,7 +96,7 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
     <div className="min-h-full p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 animate-fade-in">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate('/preview')}>
               <ArrowLeft className="w-5 h-5" />
@@ -115,7 +115,7 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
         </div>
 
         {/* Download Section */}
-        <div className="glass-card p-6 mb-8 animate-slide-up">
+        <div className="glass-card p-6 mb-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
               <Download className="w-6 h-6 text-primary" />
@@ -188,7 +188,7 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
         </div>
 
         {/* Data Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Raw Data Preview */}
           <div className="glass-card overflow-hidden">
             <div className="p-4 border-b border-border flex items-center gap-3">
@@ -216,7 +216,7 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
                       {columns.map((col) => (
                         <TableCell key={col} className="font-mono text-sm">
                           {typeof row[col] === 'number' 
-                            ? row[col].toFixed(2) 
+                            ? Math.round(row[col]) 
                             : String(row[col]).slice(0, 25)
                           }
                         </TableCell>
@@ -255,7 +255,7 @@ const SyntheticDataPage = ({ dataset }: SyntheticDataPageProps) => {
                       {columns.map((col) => (
                         <TableCell key={col} className="font-mono text-sm">
                           {typeof row[col] === 'number' 
-                            ? row[col].toFixed(2) 
+                            ? Math.round(row[col]) 
                             : String(row[col]).slice(0, 25)
                           }
                         </TableCell>

@@ -156,7 +156,7 @@ const HistoryPage = ({ history, onSelectDataset, onDeleteDataset, onClearHistory
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold truncate">{dataset.fileName}</h3>
+                      <h3 className="font-semibold truncate">{dataset.fileName || dataset.id}</h3>
                       {dataset.hasSynthetic && dataset.qualityReport && (
                         <Badge className={getQualityColor(dataset.qualityReport.qualityLevel)}>
                           {getQualityIcon(dataset.qualityReport.qualityLevel)}
@@ -171,10 +171,10 @@ const HistoryPage = ({ history, onSelectDataset, onDeleteDataset, onClearHistory
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                       <span className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        {format(new Date(dataset.uploadedAt), 'MMM d, yyyy h:mm a')}
+                        {dataset.uploadedAt ? format(new Date(dataset.uploadedAt), 'MMM d, yyyy h:mm a') : 'Unknown date'}
                       </span>
-                      <span>{dataset.rowCount.toLocaleString()} rows</span>
-                      <span>{dataset.columnCount} columns</span>
+                      <span>{(dataset.rowCount || 0).toLocaleString()} rows</span>
+                      <span>{dataset.columnCount || 0} columns</span>
                     </div>
 
                     {/* Quality Metrics */}

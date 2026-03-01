@@ -135,7 +135,10 @@ const PreviewPage = ({ dataset, onDatasetUpdate, onGenerationComplete }: Preview
                       <TableRow key={idx}>
                         {columns.map((col) => (
                           <TableCell key={col} className="font-mono text-sm">
-                            {String(row[col]).slice(0, 20)}
+                            {typeof row[col] === 'number' 
+                              ? Math.round(row[col]) 
+                              : String(row[col]).slice(0, 20)
+                            }
                           </TableCell>
                         ))}
                       </TableRow>

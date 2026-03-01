@@ -1,11 +1,11 @@
 import { ReactNode } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Database, LogOut, User, Info } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Database, ArrowLeft, Sparkles, User, History } from 'lucide-react';
 import AppSidebar from './AppSidebar';
+import { UserNav } from './UserNav';
 import { DatasetHistory } from '@/types/dataset';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -23,87 +23,53 @@ const MainLayout = ({
   currentDatasetId 
 }: MainLayoutProps) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { signOut } = useAuth();
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/');
-  };
 
-  const generatePath = currentDatasetId ? "/preview" : "/upload";
+  const generatePath = "/home";
   const isGenerateActive = ['/upload', '/preview', '/synthetic'].includes(location.pathname);
+
+  const navLinks = [
+    { name: 'Back', href: '/', icon: ArrowLeft },
+    { name: 'Generate', href: '/home', icon: Database, active: isGenerateActive },
+    { name: 'Gen AI', href: '/gen-ai', icon: Sparkles, active: location.pathname === '/gen-ai' },
+    { name: 'History', href: '/history', icon: History, active: location.pathname === '/history' },
+    { name: 'Account', href: '/profile', icon: User, active: location.pathname === '/profile' },
+  ];
 
   return (
     <div className="h-screen w-full overflow-hidden bg-background flex flex-col">
       {/* Top Navigation */}
-      <header className="h-14 border-b border-border bg-card/80 backdrop-blur-sm flex items-center justify-between z-20 shrink-0">
-        <div className="flex items-center h-full">
-          {/* LOGO SECTION: Width set to w-16 to match the collapsed sidebar exactly */}
-          <div className="w-16 flex items-center justify-center border-r border-transparent">
-            <Link to="/home" className="flex items-center justify-center">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-sm">
-                <Database className="w-4 h-4 text-white" />
-              </div>
-            </Link>
+      <header className="flex items-center justify-between px-6 py-4 lg:px-20 sticky top-0 bg-background/50 backdrop-blur-md z-50 border-b border-border shrink-0">
+        <Link to="/home" className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+            <Database className="w-5 h-5 text-white" />
           </div>
-          
-          {/* TEXT SECTION: Separated so it sits to the right of the logo 'column' */}
-          <div className="pl-3">
-            <span className="text-lg font-bold tracking-tight text-foreground">DataCraft</span>
-          </div>
+          <span className="text-2xl font-bold gradient-text">DataCraft</span>
+        </Link>
+
+        <div className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.name}
+                to={link.href}
+                className={cn(
+                  "flex items-center gap-2 text-sm font-medium whitespace-nowrap",
+                  (link.active !== undefined ? link.active : location.pathname === link.href)
+                    ? "text-[#E87B64]" 
+                    : "text-foreground/70 hover:text-primary"
+                )}
+              >
+                <Icon className="w-4 h-4" />
+                {link.name}
+              </Link>
+            );
+          })}
         </div>
         
-        {/* Right side navigation items */}
-        <div className="flex items-center gap-4 px-6">
-          <Link 
-            to="/home" 
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-              location.pathname === '/home' ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            )}
-          >
-            <Home className="w-4 h-4" />
-            Home
-          </Link>
-
-          <Link 
-            to={generatePath} 
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-              isGenerateActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            )}
-          >
-            <Database className="w-4 h-4" />
-            Generate
-          </Link>
-
-          <Link 
-            to="/about" 
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-              location.pathname === '/about' ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            )}
-          >
-            <Info className="w-4 h-4" />
-            About
-          </Link>
-          
-          <Link 
-            to="/profile" 
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-              location.pathname === '/profile' ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            )}
-          >
-            <User className="w-4 h-4" />
-            Account
-          </Link>
-
-          <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-2 ml-2">
-            <LogOut className="w-4 h-4" />
-            Logout
-          </Button>
+        <div className="flex items-center gap-4">
+          <UserNav />
         </div>
       </header>
 
@@ -116,7 +82,7 @@ const MainLayout = ({
           currentDatasetId={currentDatasetId}
         />
         
-        <main className="flex-1 overflow-auto bg-background/50">
+        <main className="flex-1 overflow-auto grid-pattern">
           {children}
         </main>
       </div>

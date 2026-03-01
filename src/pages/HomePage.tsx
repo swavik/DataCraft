@@ -4,19 +4,19 @@ import { Button } from '@/components/ui/button';
 
 const HomePage = () => {
   return (
-    <div className="min-h-full grid-pattern flex items-center justify-center p-8">
-      <div className="max-w-3xl mx-auto text-center animate-fade-in">
+    <div className="min-h-full flex items-center justify-center p-8">
+      <div className="max-w-3xl mx-auto text-center">
         {/* Icon */}
-        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg transform transition-transform hover:scale-110 duration-300">
+        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg cursor-default">
           <Database className="w-10 h-10 text-white" />
         </div>
 
         {/* DataCraft - Increased Size */}
         <div className="mb-4">
-          <h2 className="text-5xl md:text-6xl font-bold tracking-tight gradient-text animate-in fade-in slide-in-from-bottom-6 duration-1000 fill-mode-forwards cursor-default">
+          <h2 className="text-5xl md:text-6xl font-bold tracking-tight gradient-text cursor-default">
             DataCraft
           </h2>
-          <div className="h-1.5 w-16 bg-gradient-to-r from-primary to-accent mx-auto mt-3 rounded-full animate-pulse" />
+          <div className="h-1.5 w-16 bg-gradient-to-r from-primary to-accent mx-auto mt-3 rounded-full" />
         </div>
 
         {/* Main Title - Decreased size for the first part, Black for the second */}
@@ -39,16 +39,9 @@ const HomePage = () => {
           <Link to="/upload">
             <Sparkles className="w-5 h-5" />
             Start Generating
-            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="w-5 h-5" />
           </Link>
         </Button>
-
-        {/* Learn More Link */}
-        <p className="mt-8 text-sm text-muted-foreground">
-          <Link to="/about" className="hover:text-primary transition-colors font-medium">
-            Learn more about how it works →
-          </Link>
-        </p>
       </div>
     </div>
   );

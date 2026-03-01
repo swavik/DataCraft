@@ -1,124 +1,100 @@
 import { useNavigate } from 'react-router-dom';
-import { Database, ArrowRight, Shield, Layers, Sparkles } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { ArrowRight, Shield, Zap, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import authBg from '@/assets/auth-background.jpg';
+import { LandingLayout } from '@/components/layout/LandingLayout';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  const handleStart = () => {
+    if (loading) return;
+    if (user) {
+      navigate('/home');
+    } else {
+      navigate('/auth');
+    }
+  }
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden font-sans">
-      {/* Background - Matches AuthPage exactly */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${authBg})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-background/90 via-background/70 to-background/50 backdrop-blur-[2px]" />
-      </div>
-
-      {/* Content Layer */}
-      <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Navigation */}
-        <nav className="flex items-center justify-between px-6 py-6 lg:px-20">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-              <Database className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-2xl font-bold gradient-text">DataCraft</span>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => navigate('/auth')}
-              className="text-foreground font-medium hover:text-primary transition-colors px-4"
-            >
-              Login
-            </button>
-            <Button 
-              onClick={() => navigate('/auth')}
-              className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl px-6"
-            >
-              Get Started
-            </Button>
-          </div>
-        </nav>
-
-        {/* Hero Section */}
-        <main className="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-5xl mx-auto space-y-8">
-          <div className="flex items-center gap-2 text-primary font-semibold animate-fade-in">
-            <Sparkles className="w-5 h-5" />
-            <span>AI-Powered Synthetic Data Generation</span>
+    <LandingLayout>
+      <main className="min-h-[calc(100vh-80px)] flex flex-col items-center px-6 text-center max-w-5xl mx-auto w-full justify-center">
+        <div className="flex flex-col items-center justify-center space-y-6 w-full py-4">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/40 backdrop-blur-md border border-white/20 shadow-sm">
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-sm font-medium text-foreground/70 tracking-wide">
+              Privacy-First Synthetic Data Generation
+            </span>
           </div>
 
-          <h1 className="text-5xl lg:text-7xl font-bold text-foreground leading-tight tracking-tight">
+          <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
             The Future of Data <br />
             <span className="gradient-text">Privacy is Here</span>
           </h1>
 
-          <p className="text-xl text-muted-foreground/80 max-w-2xl leading-relaxed">
+          <p className="text-lg text-muted-foreground/80 max-w-2xl leading-relaxed">
             Transform your datasets into privacy-safe synthetic data using advanced 
             CTGAN technology. Maintain statistical properties while protecting 
             sensitive information.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-4 pt-2">
             <Button 
               size="lg"
-              onClick={() => navigate('/auth')}
-              className="bg-accent hover:bg-accent/90 text-accent-foreground py-7 px-10 text-lg font-semibold group rounded-2xl shadow-xl"
+              onClick={handleStart}
+              className="bg-accent hover:bg-accent/90 text-accent-foreground py-6 px-10 text-lg font-semibold group rounded-2xl shadow-xl"
             >
               Start Generating
-              <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             
             <Button 
               size="lg"
               variant="outline"
-              className="backdrop-blur-md bg-white/10 border-white/20 py-7 px-10 text-lg font-semibold rounded-2xl hover:bg-white/20"
+              className="backdrop-blur-md bg-white/10 border-white/20 py-6 px-10 text-lg font-semibold rounded-2xl hover:bg-white/20"
+              onClick={() => navigate('/documentation')}
             >
-              Learn More
+              View Documentation
             </Button>
           </div>
+        </div>
 
-          {/* Feature Cards - Using your specific Lucide icons */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full">
-            {[
-              { 
-                icon: Shield, 
-                title: "Privacy First", 
-                desc: "Your data stays protected with advanced privacy techniques" 
-              },
-              { 
-                icon: Layers, 
-                title: "High Quality", 
-                desc: "Realistic synthetic data that maintains statistical properties" 
-              },
-              { 
-                icon: Sparkles, 
-                title: "CTGAN Powered", 
-                desc: "Leveraging state-of-the-art AI for superior results" 
-              }
-            ].map((feature, i) => (
-              <div 
-                key={i}
-                className="backdrop-blur-xl bg-card/60 border border-border/50 rounded-2xl p-6 text-left space-y-3 shadow-lg"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <feature.icon className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-bold text-foreground">{feature.title}</h3>
+        {/* Small Feature Cards - Bottom Style */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 mb-4 w-full max-w-4xl">
+          {[
+            { 
+              icon: Shield, 
+              title: "Privacy First", 
+              desc: "GDPR Compliant" 
+            },
+            { 
+              icon: Zap, 
+              title: "Fast Generation", 
+              desc: "Real-time Processing" 
+            },
+            { 
+              icon: BarChart3, 
+              title: "Quality Metrics", 
+              desc: "Statistical Validation" 
+            }
+          ].map((feature, i) => (
+            <div 
+              key={i}
+              className="backdrop-blur-md bg-white/80 border border-white/20 rounded-2xl p-4 flex items-center gap-4 shadow-sm"
+            >
+              <div className="w-12 h-12 rounded-xl bg-[#FDF2F0] flex items-center justify-center shrink-0 shadow-sm">
+                <feature.icon className="w-6 h-6 text-[#E87B64]" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-bold text-base text-foreground">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground/80">{feature.desc}</p>
               </div>
-            ))}
-          </div>
-        </main>
-
-        {/* Footer */}
-        <footer className="py-8 text-center text-sm text-muted-foreground/60">
-          © 2026 DataCraft AI. All rights reserved.
-        </footer>
-      </div>
-    </div>
+            </div>
+          ))}
+        </div>
+      </main>
+    </LandingLayout>
   );
 };
 
