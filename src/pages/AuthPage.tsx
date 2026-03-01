@@ -112,7 +112,7 @@ const AuthPage = () => {
       </div>
 
       {/* Floating Element */}
-      <div className="absolute top-20 left-10 w-16 h-16 rounded-xl bg-primary/20 backdrop-blur-md border border-primary/30 flex items-center justify-center animate-bounce-slow">
+      <div className="absolute top-20 left-10 w-16 h-16 rounded-xl bg-primary/20 backdrop-blur-md border border-primary/30 flex items-center justify-center">
         <Database className="w-8 h-8 text-primary" />
       </div>
 
@@ -120,7 +120,7 @@ const AuthPage = () => {
       <div className="relative z-10 flex w-full">
         {/* Left Side - Info */}
         <div className="hidden lg:flex flex-1 flex-col justify-center px-12 xl:px-20">
-          <div className={`space-y-6 transition-all duration-1000 ${textVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className="space-y-6">
             {/* Logo */}
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
@@ -156,7 +156,7 @@ const AuthPage = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentCarousel(index)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                    className={`h-1.5 rounded-full ${
                       index === currentCarousel 
                         ? 'w-8 bg-primary' 
                         : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
@@ -169,10 +169,10 @@ const AuthPage = () => {
                 {carouselItems.map((item, index) => (
                   <div
                     key={index}
-                    className={`absolute inset-0 flex items-start gap-4 transition-all duration-500 ${
+                    className={`absolute inset-0 flex items-start gap-4 ${
                       index === currentCarousel 
-                        ? 'opacity-100 translate-x-0' 
-                        : 'opacity-0 translate-x-8'
+                        ? 'opacity-100' 
+                        : 'opacity-0'
                     }`}
                   >
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -191,11 +191,7 @@ const AuthPage = () => {
 
         {/* Right Side - Auth Box */}
         <div className="flex-1 flex items-center justify-center px-6 py-12 lg:px-12">
-          <div 
-            className={`w-full max-w-md transition-all duration-700 delay-300 ${
-              textVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-          >
+          <div className="w-full max-w-md">
             {/* Glass Card */}
             <div className="backdrop-blur-xl bg-card/80 border border-border/50 rounded-2xl shadow-2xl p-8 space-y-6">
               {/* Mobile Logo */}
@@ -212,7 +208,7 @@ const AuthPage = () => {
                     setError('');
                     setSuccess('');
                   }}
-                  className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+                  className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm ${
                     isLogin 
                       ? 'bg-primary text-primary-foreground shadow-md' 
                       : 'text-muted-foreground hover:text-foreground'
@@ -228,7 +224,7 @@ const AuthPage = () => {
                     setName('');
                     setPhoneNumber('');
                   }}
-                  className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+                  className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm ${
                     !isLogin 
                       ? 'bg-primary text-primary-foreground shadow-md' 
                       : 'text-muted-foreground hover:text-foreground'
@@ -271,7 +267,7 @@ const AuthPage = () => {
 
                 {!isLogin && (
                   <>
-                    <div className="space-y-2 animate-fade-in">
+                    <div className="space-y-2">
                       <Label htmlFor="name" className="text-foreground font-medium">
                         Full Name
                       </Label>
@@ -288,7 +284,7 @@ const AuthPage = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-2 animate-fade-in">
+                    <div className="space-y-2">
                       <Label htmlFor="phoneNumber" className="text-foreground font-medium">
                         Phone Number
                       </Label>
@@ -325,7 +321,7 @@ const AuthPage = () => {
                 </div>
 
                 {!isLogin && (
-                  <div className="space-y-2 animate-fade-in">
+                  <div className="space-y-2">
                     <Label htmlFor="confirmPassword" className="text-foreground font-medium">
                       Confirm Password
                     </Label>
@@ -349,7 +345,7 @@ const AuthPage = () => {
                   className="w-full bg-accent hover:bg-accent/90 text-accent-foreground py-6 text-base font-semibold group"
                 >
                   {isSubmitting ? 'Please wait...' : (isLogin ? 'Login' : 'Sign Up')}
-                  {!isSubmitting && <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />}
+                  {!isSubmitting && <ArrowRight className="w-4 h-4 ml-2" />}
                 </Button>
               </form>
             </div>

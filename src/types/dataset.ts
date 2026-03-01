@@ -56,13 +56,3 @@ export interface DatasetHistory {
   stats?: DatasetStats;
   qualityReport?: QualityReport;
 }
-
-export interface SampleDataset {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  rowCount: number;
-  columns: string[];
-  data: any[];
-}
