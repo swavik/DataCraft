@@ -10,6 +10,7 @@ Description - This project involves designing a synthetic data generation platfo
 
 URL - https://datacraft-syntheticdata.netlify.app/
 
+
 ## Overview
 
 **DataCraft** is a platform designed to generate **high-quality synthetic datasets** using deep learning techniques such as **Generative Adversarial Networks (GANs)** and **Variational Autoencoders (VAEs)**.
